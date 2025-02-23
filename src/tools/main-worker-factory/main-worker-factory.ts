@@ -96,7 +96,7 @@ class MainWorkerFactory {
       .catch((error) => {
         if (retryCount > 0) {
           console.error(
-            `Worker failed, retrying (${retryCount} attempts remaining):`,
+            `Worker ${workerConfigs.index} failed, retrying (${retryCount} attempts remaining):`,
             error,
           );
           return this.runWorkerWithRetry(

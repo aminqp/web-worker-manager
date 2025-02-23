@@ -4,31 +4,15 @@ import initiator from './workers/initiator.ts';
 import expensiveComputation1 from './examples/expensive-computation-1.ts';
 import { MainWorkerFactory, WorkerConfig } from './tools';
 
-function handleWorkers(workers: WorkerConfig[]): void {
-  const worker = new MainWorkerFactory(initiator, { workers });
+function setupWorkers(workers: WorkerConfig[]) {
+  const foreman = new MainWorkerFactory(initiator, { workers });
 
-  // worker.initWorkers();
+  console.log(foreman);
 
-  console.log(worker);
-  const btn = document.getElementById('increaseByOne')!;
-
-
-  btn.onclick = () => {
-    const begin = performance.now();
-    console.log(`\n\n<<<<< THREAD IS STARTED  >>>>> =>  -> `);
-
-    worker.runWorker('exp1', { seconds: 10 }).then((res) => {
-      console.log(`\n\n<<<<< btn.onclick  >>>>> => res -> `, res);
-      console.log(
-        `\n\n<<<<<  THREAD IS FINISHED IN >>>>> =>  -> `,
-        performance.now() - begin,
-        'ms',
-      );
-    });
-  };
+  return { foreman };
 }
 
-handleWorkers([
+const { foreman } = setupWorkers([
   {
     name: 'exp1',
     role: 'computation',
@@ -37,3 +21,19 @@ handleWorkers([
     // maxConcurrency: navigator.hardwareConcurrency,
   },
 ]);
+
+const btn = document.getElementById('increaseByOne')!;
+
+btn.onclick = () => {
+  const begin = performance.now();
+  console.log(`\n\n<<<<< THREAD IS STARTED  >>>>> =>  -> `);
+
+  foreman.runWorker('exp1', { seconds: 10 }).then((res) => {
+    console.log(`\n\n<<<<< btn.onclick  >>>>> => res -> `, res);
+    console.log(
+      `\n\n<<<<<  THREAD IS FINISHED IN >>>>> =>  -> `,
+      performance.now() - begin,
+      'ms',
+    );
+  });
+};
