@@ -2,15 +2,21 @@ import {
   MainWorkerFactoryOptions,
   MainWorkerFactoryWorker,
   WorkerFunction,
-  WorkerName,
+  WorkerInstanceConfig,
+  WorkerResult,
 } from './types.ts';
 import { WorkerFactory } from '../worker-factory';
 
-const threadHasError =  function () {
-  let seconds = 5
+enum RESULT_STATUS {
+  FULFILLED = 'fulfilled',
+  REJECTED = 'rejected',
+}
+
+const threadHasError = function () {
+  let seconds = 5;
   seconds *= Math.random() + 0.5;
   let start = new Date();
-  while (((new Date()).valueOf() - start.valueOf()) / 1000 < seconds);
+  while ((new Date().valueOf() - start.valueOf()) / 1000 < seconds);
 
   throw new Error('someErrorThread');
 };
@@ -20,7 +26,7 @@ class MainWorkerFactory {
   private readonly _workers: MainWorkerFactoryOptions['workers'];
   private _activeWorkers: MainWorkerFactoryWorker[] = [];
   private _workersResult: unknown[] = [];
-  private _threads: number;
+  private readonly _threads: number;
 
   constructor(workerFunction: any, options: MainWorkerFactoryOptions) {
     const workerCode: string = workerFunction.toString();
@@ -57,29 +63,57 @@ class MainWorkerFactory {
         throw new Error(`Worker ${workerName} not found`);
       }
 
-      this._threads =
-        foundWorker.maxConcurrency || navigator.hardwareConcurrency;
+      const threads = foundWorker.maxConcurrency || this._threads;
 
-      const res = Promise.allSettled(
-        Array(this._threads)
-          .fill(0)
-          .map((_, index) => {
-            return this.initiateWorker({
+      const preparedWorkers = Array(threads)
+        .fill(0)
+        .map((_, index) => {
+          return this.runWorkerWithRetry(
+            {
               workerFunc: foundWorker.func,
               workerName,
               index,
               data,
-            });
-          }),
-      ).catch((err) => {
-        console.log(`\n\n<<<<<  runWorker  >>>>> => err -> `, err);
-        reject(err);
+            },
+            foundWorker.retries,
+          );
+        });
+
+      Promise.allSettled(preparedWorkers).then((res) => {
+        resolve(res);
       });
-
-      console.log(`\n\n<<<<< runWorker  >>>>> => res -> `, res);
-
-      resolve(res);
     });
+  }
+
+  runWorkerWithRetry(
+    workerConfigs: WorkerInstanceConfig,
+    retryCount = 2,
+  ): Promise<WorkerResult> {
+    return this.initiateWorker(workerConfigs)
+      .then((result: WorkerResult) => {
+        return Promise.resolve(result);
+      })
+      .catch((error) => {
+        if (retryCount > 0) {
+          console.error(
+            `Worker failed, retrying (${retryCount} attempts remaining):`,
+            error,
+          );
+          return this.runWorkerWithRetry(
+            {
+              ...workerConfigs,
+              index:
+                workerConfigs.index === 3
+                  ? workerConfigs.index - 1
+                  : workerConfigs.index,
+            },
+            retryCount - 1,
+          );
+        } else {
+          console.error(`Worker failed after multiple retries:`, error);
+          return Promise.reject(error); // Re-throw the error after exhausting retries
+        }
+      });
   }
 
   initiateWorker({
@@ -87,24 +121,20 @@ class MainWorkerFactory {
     workerName,
     index,
     data,
-  }: {
-    workerName: WorkerName;
-    workerFunc: WorkerFunction;
-    index: number;
-    data: any;
-  }) {
+  }: WorkerInstanceConfig): Promise<WorkerResult> {
     return new Promise((resolve, reject) => {
       // let worker = this.initWorker(workerFunc);
 
       let worker =
-        index % 2 !== 0
+        index % 2 === 0
           ? this.initWorker(workerFunc)
           : this.initWorker(threadHasError);
 
       // TODO-qp:: handle failed threads
       worker.getWorker.onerror = (event) => {
         console.log(
-          `\n\n<<<<<  worker.getWorker.onerror >>>>> => event -> `,index,
+          `\n\n<<<<<  worker.getWorker.onerror >>>>> => event -> `,
+          index,
           event,
         );
         worker.getWorker.terminate();
@@ -113,18 +143,39 @@ class MainWorkerFactory {
           `\n\n<<<<<  worker.getWorker.onerror >>>>> => worker -> `,
           worker,
         );
-        reject(event);
+        reject({
+          index,
+          workerConfigs: {
+            workerFunc,
+            workerName,
+            index,
+            data,
+          },
+          failedResult: event,
+        });
       };
 
       worker.getWorker.onmessage = (event) => {
-        console.log(index,`Worker ${workerName} finished with result: ${event.data}`);
+        console.log(
+          index,
+          `Worker ${workerName} finished with result: ${event.data}`,
+        );
         // this.catchResult({
         //   workerResult: event.data,
         //   index,
         //   resolve,
         // });
 
-        resolve(event.data);
+        resolve({
+          index,
+          workerConfigs: {
+            workerFunc,
+            workerName,
+            index,
+            data,
+          },
+          successResult: event,
+        });
         worker.getWorker.terminate();
       };
 

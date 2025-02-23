@@ -9,6 +9,7 @@ export interface WorkerConfig {
   role: WorkerRole;
   func: WorkerFunction;
   maxConcurrency?: number
+  retries?: number
 };
 
 export interface MainWorkerFactoryOptions {
@@ -17,4 +18,20 @@ export interface MainWorkerFactoryOptions {
 
 export interface MainWorkerFactoryWorker extends WorkerConfig {
   worker: WorkerFactory;
+}
+
+export interface WorkerInstanceConfig {
+  workerName: WorkerName;
+  workerFunc: WorkerFunction;
+  index: number;
+  data: any;
+}
+
+export type WorkerSuccessResult = MessageEvent;
+export type WorkerFailedResult = MessageEvent;
+export interface WorkerResult {
+  index: number,
+  workerConfigs: WorkerInstanceConfig,
+  successResult?: WorkerSuccessResult,
+  failedResult?: WorkerFailedResult,
 }

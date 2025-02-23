@@ -8,8 +8,8 @@
     * [x] Enable the main worker to open a thread
     * [x] Enable the main worker to terminate a thread
     * [x] Enable the main worker to catch and concat the result of run worker(s)
-    * [ ] Threads error handling
-    * [ ] Retries number for a faulty thread
+    * [x] Threads error handling
+    * [x] Retries number for a faulty thread
     * [ ] handle a faulty passed function
     * [ ] how to pass data to a thread
     * [ ] type od data that can be passed to a thread Array, Object, number, etc

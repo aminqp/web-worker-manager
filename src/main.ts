@@ -33,6 +33,7 @@ handleWorkers([
     name: 'exp1',
     role: 'computation',
     func: expensiveComputation1,
+    retries: 3,
     // maxConcurrency: navigator.hardwareConcurrency,
   },
 ]);
