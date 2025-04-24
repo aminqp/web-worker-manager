@@ -1,9 +1,9 @@
 import {
   MainWorkerFactoryOptions,
-  MainWorkerFactoryWorker,
+  MainWorkerFactoryWorker, WorkerConfig,
   WorkerFunction,
   WorkerInstanceConfig,
-  WorkerResult,
+  WorkerResult
 } from './types.ts';
 import { WorkerFactory } from '../worker-factory';
 
@@ -12,11 +12,11 @@ enum RESULT_STATUS {
   REJECTED = 'rejected',
 }
 
-const threadHasError = function () {
+const threadHasError = function() {
   let seconds = 5;
   seconds *= Math.random() + 0.5;
   let start = new Date();
-  while ((new Date().valueOf() - start.valueOf()) / 1000 < seconds);
+  while ((new Date().valueOf() - start.valueOf()) / 1000 < seconds) ;
 
   throw new Error('someErrorThread');
 };
@@ -51,44 +51,133 @@ class MainWorkerFactory {
     return new WorkerFactory(workerFunction);
   }
 
-  runWorker(workerName: string, data: unknown) {
-    return new Promise((resolve, reject) => {
-      const foundWorker = this._workers.find(
-        (worker) => worker.name === workerName,
-      );
+  /**
+   * Partitions an array into a specified number of chunks
+   * @param array The array to partition
+   * @param numChunks The number of chunks to create
+   * @returns An array of chunks
+   */
+  partitionArray<T>(array: T[], numChunks: number): T[][] {
+    if (!array.length) return [];
+    if (numChunks <= 0) throw new Error('Number of chunks must be positive');
+    if (numChunks === 1) return [array.slice()];
 
-      if (!foundWorker) {
-        reject(new Error(`Worker ${workerName} not found`));
+    // Ensure we don't create more chunks than there are elements
+    const validChunks = Math.min(numChunks, array.length);
+    const result: T[][] = [];
 
-        throw new Error(`Worker ${workerName} not found`);
-      }
+    // Calculate minimum size per chunk
+    const chunkSize = Math.floor(array.length / validChunks);
+    // Calculate how many chunks get an extra element
+    const remainder = array.length % validChunks;
 
-      const threads = foundWorker.maxConcurrency || this._threads;
+    let startIndex = 0;
 
-      const preparedWorkers = Array(threads)
-        .fill(0)
-        .map((_, index) => {
-          return this.runWorkerWithRetry(
-            {
-              workerFunc: foundWorker.func,
-              workerName,
-              index,
-              data,
-            },
-            foundWorker.retries,
-          );
-        });
+    for (let i = 0; i < validChunks; i++) {
+      // Add one extra item to the first 'remainder' chunks
+      const currentChunkSize = chunkSize + (i < remainder ? 1 : 0);
+      const endIndex = startIndex + currentChunkSize;
 
-      Promise.allSettled(preparedWorkers).then((res) => {
-        resolve(res);
+      result.push(array.slice(startIndex, endIndex));
+      startIndex = endIndex;
+    }
+
+    return result;
+  }
+
+  /**
+   * Runs a worker with the specified name and input data
+   * @param workerName The name of the worker to run
+   * @param data The data to process
+   * @returns A promise that resolves with the worker results
+   */
+  async runWorker(
+    workerName: string,
+    { srcData, ...otherParams }: { srcData: unknown | unknown[] } & Record<string, unknown>,
+  ): Promise<PromiseSettledResult<WorkerResult>[]> {
+    console.log('\n\n <<<<  runWorker >>>> => srcData -> ', srcData);
+    const foundWorker = this.findWorkerByName(workerName);
+
+    if (!foundWorker) {
+      const error = new Error(`Worker ${workerName} not found`);
+      return Promise.reject(error);
+    }
+
+    const threadCount = foundWorker.maxConcurrency || this._threads;
+    const shouldPartition = Boolean(
+      Array.isArray(srcData) && foundWorker.partition,
+    );
+
+    // Prepare data for worker(s)
+    const processedData = shouldPartition
+      ? this.partitionArray(srcData as unknown[], threadCount)
+      : srcData;
+
+    // Initialize and execute workers
+    const workerPromises = this.createWorkerPromises(
+      foundWorker,
+      workerName,
+      { data: processedData, ...otherParams },
+      threadCount,
+      shouldPartition,
+    );
+
+    return Promise.allSettled(workerPromises);
+  }
+
+  /**
+   * Finds a worker by name
+   * @param workerName The name of the worker to find
+   * @returns The worker configuration if found, otherwise undefined
+   */
+  private findWorkerByName(workerName: string) {
+    return this._workers.find((worker) => worker.name === workerName);
+  }
+
+  /**
+   * Creates promises for each worker instance
+   * @param workerConfig The worker configuration
+   * @param workerName The name of the worker
+   * @param data The data for the workers
+   * @param threadCount The number of threads to use
+   * @param isPartitioned Whether the data is partitioned
+   * @returns An array of promises for the worker executions
+   */
+  private createWorkerPromises(
+    workerConfig: WorkerConfig,
+    workerName: string,
+    data: unknown | unknown[][],
+    threadCount: number,
+    isPartitioned: boolean,
+  ): Promise<WorkerResult>[] {
+    console.log('\n\n <<<<  createWorkerPromises >>>> => data -> ', data);
+
+    return Array(threadCount)
+      .fill(0)
+      .map((_, index) => {
+        const workerData =
+          isPartitioned && Array.isArray(data) ? data[index] : data;
+
+        return this.runWorkerWithRetry(
+          {
+            workerFunc: workerConfig.func,
+            workerName,
+            index,
+            data: workerData,
+          },
+          workerConfig.retries,
+        );
       });
-    });
   }
 
   runWorkerWithRetry(
     workerConfigs: WorkerInstanceConfig,
     retryCount = 2,
   ): Promise<WorkerResult> {
+    console.log(
+      '\n\n <<<<  runWorkerWithRetry >>>> => workerConfigs -> ',
+      workerConfigs,
+    );
     return this.initiateWorker(workerConfigs)
       .then((result: WorkerResult) => {
         return Promise.resolve(result);
@@ -102,10 +191,10 @@ class MainWorkerFactory {
           return this.runWorkerWithRetry(
             {
               ...workerConfigs,
-              index:
-                workerConfigs.index === 3
-                  ? workerConfigs.index - 1
-                  : workerConfigs.index,
+              index: workerConfigs.index,
+              // workerConfigs.index === 3
+              //   ? workerConfigs.index - 1
+              //   : workerConfigs.index,
             },
             retryCount - 1,
           );
@@ -125,24 +214,14 @@ class MainWorkerFactory {
     return new Promise((resolve, reject) => {
       // let worker = this.initWorker(workerFunc);
 
-      let worker =
-        index % 2 === 0
-          ? this.initWorker(workerFunc)
-          : this.initWorker(threadHasError);
+      let worker = this.initWorker(workerFunc);
+      // index % 2 === 0
+      //   ? this.initWorker(workerFunc)
+      //   : this.initWorker(threadHasError);
 
       // TODO-qp:: handle failed threads
       worker.getWorker.onerror = (event) => {
-        console.log(
-          `\n\n<<<<<  worker.getWorker.onerror >>>>> => event -> `,
-          index,
-          event,
-        );
         worker.getWorker.terminate();
-
-        console.log(
-          `\n\n<<<<<  worker.getWorker.onerror >>>>> => worker -> `,
-          worker,
-        );
         reject({
           index,
           workerConfigs: {
@@ -156,10 +235,6 @@ class MainWorkerFactory {
       };
 
       worker.getWorker.onmessage = (event) => {
-        console.log(
-          index,
-          `Worker ${workerName} finished with result: ${event.data}`,
-        );
         // this.catchResult({
         //   workerResult: event.data,
         //   index,
@@ -179,7 +254,10 @@ class MainWorkerFactory {
         worker.getWorker.terminate();
       };
 
-      worker.getWorker.postMessage({ index, ...data });
+      worker.getWorker.postMessage({
+        index,
+        ...(Array.isArray(data) ? { data } : data),
+      });
     });
   }
 

@@ -10,6 +10,7 @@ export interface WorkerConfig {
   func: WorkerFunction;
   maxConcurrency?: number
   retries?: number
+  partition?: boolean
 };
 
 export interface MainWorkerFactoryOptions {
