@@ -17,19 +17,13 @@ const extractTransferables = (value, seen = new Set()) => {
 
 self.addEventListener('message', async (event) => {
     const begin = performance.now();
-    console.log('start');
-
     const output = await ${func}(event.data);
-
-    console.log('finish in', performance.now() - begin, 'ms');
-
     self.postMessage(output, extractTransferables(output));
   })
 `;
 
 class WorkerFactory {
   readonly _worker: Worker;
-
   constructor(workerFunction: WorkerFunction) {
     const workerCode: string = workerTemplate(workerFunction.toString());
     const workerBlob = new Blob([workerCode], {
