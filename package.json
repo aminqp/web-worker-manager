@@ -1,16 +1,48 @@
 {
   "name": "web-worker-manager",
-  "private": true,
   "version": "0.0.0",
+  "description": "A lightweight manager for running functions in Web Workers with partitioning, retries, and concurrency control",
   "type": "module",
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.js",
+  "types": "./dist/types/tools/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/types/tools/index.d.ts",
+      "import": "./dist/index.js",
+      "require": "./dist/index.cjs"
+    },
+    "./eslint-plugin": "./eslint-rules/index.cjs",
+    "./eslint-rules/no-dom-in-worker": "./eslint-rules/no-dom-in-worker.cjs",
+    "./eslint-rules/worker-exportable": "./eslint-rules/worker-exportable.cjs"
+  },
+  "files": [
+    "dist",
+    "eslint-rules"
+  ],
   "scripts": {
     "dev": "vite",
-    "build": "tsc && vite build",
+    "build": "vite build",
+    "build:lib": "vite build --config vite.lib.config.ts",
     "preview": "vite preview",
     "lint": "eslint .",
     "test": "vitest run",
-    "test:watch": "vitest"
+    "test:watch": "vitest",
+    "release:patch": "pnpm version patch && pnpm run release:publish",
+    "release:minor": "pnpm version minor && pnpm run release:publish",
+    "release:major": "pnpm version major && pnpm run release:publish",
+    "release:publish": "pnpm run build:lib && pnpm publish",
+    "prepublishOnly": "pnpm run build:lib"
   },
+  "keywords": [
+    "web-worker",
+    "worker",
+    "concurrency",
+    "parallel",
+    "thread",
+    "browser"
+  ],
+  "license": "MIT",
   "devDependencies": {
     "@typescript-eslint/eslint-plugin": "^8.58.2",
     "@typescript-eslint/parser": "^8.58.2",
@@ -24,6 +56,7 @@
     "prettier": "^3.4.2",
     "typescript": "^5.7.2",
     "vite": "^6.3.3",
+    "vite-plugin-dts": "^4.5.4",
     "vitest": "^1.0.0"
   }
 }
