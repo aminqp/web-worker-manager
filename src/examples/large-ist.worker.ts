@@ -1,8 +1,3 @@
-// First, make sure to install the required packages:
-// npm install date-fns date-fns-tz
-// import { parseISO } from 'date-fns';
-// import { formatInTimeZone } from 'date-fns-tz';
-
 export interface UserInfo {
   firstName: string;
   lastName: string;
@@ -14,9 +9,9 @@ export type TaskStatus = 'pending' | 'ongoing' | 'done';
 export type DateObj = { dateTime: string; timezone: string };
 
 export interface UserProfile {
-  contactInfo?: any;
-  userDetails?: any;
-  account?: any;
+  contactInfo?: { email?: string; [key: string]: unknown };
+  userDetails?: { email?: string; [key: string]: unknown };
+  account?: { email?: string; [key: string]: unknown };
   emails?: string[] | { address: string; primary?: boolean }[];
 }
 
@@ -43,8 +38,10 @@ export interface Options {
  * @param count Number of test items to generate
  * @returns Array of test items matching the ItemData interface
  */
-export function generateListTransformArrayTestData({ count }: {
-  count: number
+export function generateListTransformArrayTestData({
+  count,
+}: {
+  count: number;
 }): ItemData[] {
   // Sample data pools for random selection
   const firstNames = [
@@ -57,7 +54,7 @@ export function generateListTransformArrayTestData({ count }: {
     'james',
     'ava',
     'robert',
-    'mia'
+    'mia',
   ];
   const lastNames = [
     'smith',
@@ -69,7 +66,7 @@ export function generateListTransformArrayTestData({ count }: {
     'davis',
     'garcia',
     'rodriguez',
-    'wilson'
+    'wilson',
   ];
   const statuses: TaskStatus[] = ['pending', 'ongoing', 'done'];
   const timezones = [
@@ -77,7 +74,7 @@ export function generateListTransformArrayTestData({ count }: {
     'Europe/London',
     'Asia/Tokyo',
     'Australia/Sydney',
-    'Pacific/Auckland'
+    'Pacific/Auckland',
   ];
   const locales = ['en-US', 'fr-FR', 'es-ES', 'de-DE', 'ja-JP', 'zh-CN'];
   const countries = [
@@ -90,7 +87,7 @@ export function generateListTransformArrayTestData({ count }: {
     'Canada',
     'Brazil',
     'India',
-    'Australia'
+    'Australia',
   ];
   const currencies = ['USD', 'EUR', 'GBP', 'JPY', 'CAD', 'AUD', 'INR', 'CNY'];
   const emailDomains = [
@@ -98,7 +95,7 @@ export function generateListTransformArrayTestData({ count }: {
     'yahoo.com',
     'outlook.com',
     'company.com',
-    'example.org'
+    'example.org',
   ];
 
   /**
@@ -149,8 +146,8 @@ export function generateListTransformArrayTestData({ count }: {
         return {
           emails: [
             emailAddress,
-            `${firstName}${Math.floor(Math.random() * 100)}@${domain}`
-          ]
+            `${firstName}${Math.floor(Math.random() * 100)}@${domain}`,
+          ],
         };
       case 1:
         // Format: emails array with objects
@@ -159,33 +156,33 @@ export function generateListTransformArrayTestData({ count }: {
             { address: emailAddress, primary: true },
             {
               address: `${firstName}${Math.floor(Math.random() * 100)}@${domain}`,
-              primary: false
-            }
-          ]
+              primary: false,
+            },
+          ],
         };
       case 2:
         // Format: contactInfo structure
         return {
           contactInfo: {
             email: emailAddress,
-            phone: `+1${Math.floor(Math.random() * 10000000000)}`
-          }
+            phone: `+1${Math.floor(Math.random() * 10000000000)}`,
+          },
         };
       case 3:
         // Format: userDetails structure
         return {
           userDetails: {
             email: emailAddress,
-            username: `${firstName}${lastName}`
-          }
+            username: `${firstName}${lastName}`,
+          },
         };
       default:
         // Format: account structure
         return {
           account: {
             email: emailAddress,
-            id: `user-${Math.floor(Math.random() * 10000)}`
-          }
+            id: `user-${Math.floor(Math.random() * 10000)}`,
+          },
         };
     }
   };
@@ -203,38 +200,35 @@ export function generateListTransformArrayTestData({ count }: {
     return {
       username: {
         firstName,
-        lastName
+        lastName,
       },
       rate: Math.random(), // Random rate between 0 and 1
       email: generateRandomEmailStructure(),
       status,
       createdAt: {
         dateTime: getRandomDate(),
-        timezone
+        timezone,
       },
       finishedAt: isFinished
         ? {
-          dateTime: getRandomFutureDate(),
-          timezone
-        }
+            dateTime: getRandomFutureDate(),
+            timezone,
+          }
         : null,
       locale: getRandomItem(locales),
       country: getRandomItem(countries),
       price: parseFloat((Math.random() * 1000).toFixed(2)), // Random price up to 1000
-      currency: getRandomItem(currencies)
+      currency: getRandomItem(currencies),
     } as ItemData;
   });
 }
 
-
-
 export function listTransformArray({
   data,
-  options,
 }: {
   data: ItemData[];
-  options: Options;
-}): string[][]{
+  options?: Options;
+}): string[][] {
   /**
    * Extracts user email from a profile object with a specific structure
    * @param params Object containing contact and account information
@@ -293,22 +287,9 @@ export function listTransformArray({
     }
 
     try {
-      // Parse the UTC string to a Date object
-      // const parsedDate = options.parseISO(dateObj.dateTime);
-      //
-      // // Format the date according to the specified timezone and format
-      // // Format: (timezone) MonthName DayNumber Year, hour:minute AM/PM
-      // const formattedDate = options.formatInTimeZone(
-      //   parsedDate,
-      //   dateObj.timezone,
-      //   `(${dateObj.timezone}) MMMM d yyyy, h:mm a`
-      // );
-      //
-      // return formattedDate;
-
-      return `(${dateObj.timezone}) ${dateObj.dateTime}`
-    } catch (error) {
-      console.error('Error formatting date:', error);
+      return `(${dateObj.timezone}) ${dateObj.dateTime}`;
+    } catch (_error) {
+      console.error('Error formatting date:', _error);
       return dateObj.dateTime; // Return original as fallback
     }
   }
@@ -330,7 +311,7 @@ export function listTransformArray({
         currency: currencyCode,
         // Adjust decimal places based on currency standards
         minimumFractionDigits: 2,
-        maximumFractionDigits: 2
+        maximumFractionDigits: 2,
       }).format(price);
 
       // This will produce outputs like:
@@ -338,7 +319,7 @@ export function listTransformArray({
       // €10.99 (for EUR)
       // £10.99 (for GBP)
       // etc.
-    } catch (error) {
+    } catch {
       // Fallback to simple format if Intl formatting fails
       return `${price} ${currency}`;
     }
@@ -401,5 +382,4 @@ export function listTransformArray({
 
     return transformedItem;
   });
-
-};
+}

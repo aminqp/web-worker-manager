@@ -11,7 +11,9 @@ export interface FlakyTaskResult {
  * (network timeouts, transient DB errors, rate limits, etc.).
  * The worker config sets retries so the framework auto-retries failed shards.
  */
-export function flakyTask({ data }: {
+export function flakyTask({
+  data,
+}: {
   data: { taskId: string; failRate: number; workMs: number };
 }): FlakyTaskResult {
   const task = Array.isArray(data) ? data[0] : data;
@@ -19,7 +21,9 @@ export function flakyTask({ data }: {
 
   // Simulate work duration
   const start = Date.now();
-  while (Date.now() - start < workMs) { /* spin */ }
+  while (Date.now() - start < workMs) {
+    /* spin */
+  }
 
   // Randomly fail based on failRate (0–1)
   if (Math.random() < failRate) {
@@ -38,7 +42,9 @@ export function flakyTask({ data }: {
  * Generates a batch of flaky task descriptors.
  * Some tasks have a high fail rate to guarantee retries are exercised.
  */
-export function generateFlakyTasks({ data }: {
+export function generateFlakyTasks({
+  data,
+}: {
   data: { count: number };
 }): { taskId: string; failRate: number; workMs: number }[] {
   const count = Array.isArray(data) ? data[0].count : data.count;

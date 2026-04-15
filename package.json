@@ -25,14 +25,15 @@
     "build": "vite build",
     "build:lib": "vite build --config vite.lib.config.ts",
     "preview": "vite preview",
-    "lint": "eslint .",
+    "lint": "eslint --fix .",
     "test": "vitest run",
     "test:watch": "vitest",
     "release:patch": "pnpm version patch && pnpm run release:publish",
     "release:minor": "pnpm version minor && pnpm run release:publish",
     "release:major": "pnpm version major && pnpm run release:publish",
     "release:publish": "pnpm run build:lib && pnpm publish",
-    "prepublishOnly": "pnpm run build:lib"
+    "prepublishOnly": "pnpm run build:lib",
+    "prepare": "husky"
   },
   "keywords": [
     "web-worker",
@@ -43,6 +44,15 @@
     "browser"
   ],
   "license": "MIT",
+  "lint-staged": {
+    "**/*.{ts,tsx}": [
+      "eslint --fix",
+      "prettier --write"
+    ],
+    "**/*.{js,cjs,json,md}": [
+      "prettier --write"
+    ]
+  },
   "devDependencies": {
     "@typescript-eslint/eslint-plugin": "^8.58.2",
     "@typescript-eslint/parser": "^8.58.2",
@@ -52,7 +62,9 @@
     "eslint-config-prettier": "^10.1.8",
     "eslint-plugin-local-rules": "^3.0.2",
     "eslint-plugin-prettier": "^5.5.5",
+    "husky": "^9.1.7",
     "jsdom": "^24.0.0",
+    "lint-staged": "^16.4.0",
     "prettier": "^3.4.2",
     "typescript": "^5.7.2",
     "vite": "^6.3.3",

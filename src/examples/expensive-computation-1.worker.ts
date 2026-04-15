@@ -10,6 +10,6 @@ function wait({
   while ((new Date().valueOf() - start.valueOf()) / 1000 < seconds);
 
   return `${index} = seconds: ${seconds}`;
-};
+}
 
 export default wait;

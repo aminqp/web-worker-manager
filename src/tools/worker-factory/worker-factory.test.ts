@@ -1,4 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
+import type { WorkerFunction } from '../main-worker-factory/types';
 
 // ---------------------------------------------------------------------------
 // Mock Worker + URL.createObjectURL before importing WorkerFactory
@@ -75,8 +76,10 @@ describe('WorkerFactory – positive', () => {
   });
 
   it('embeds the function body in the worker code', () => {
-    const fn = function double(x: number) { return x * 2; };
-    new WorkerFactory(fn);
+    const fn = function double(x: number) {
+      return x * 2;
+    };
+    new WorkerFactory(fn as WorkerFunction);
     const blobContent = blobParts[0][0] as string;
     expect(blobContent).toContain(fn.toString());
   });
@@ -90,7 +93,9 @@ describe('WorkerFactory – positive', () => {
   it('calls self.postMessage in the generated template', () => {
     new WorkerFactory(() => {});
     const blobContent = blobParts[0][0] as string;
-    expect(blobContent).toContain('self.postMessage(output, extractTransferables(output))');
+    expect(blobContent).toContain(
+      'self.postMessage(output, extractTransferables(output))',
+    );
   });
 
   it('each WorkerFactory instance creates an independent Worker', () => {
@@ -132,14 +137,16 @@ describe('WorkerFactory – native behaviour', () => {
 describe('WorkerFactory – edge cases', () => {
   it('works with an arrow function', () => {
     const fn = (x: number) => x + 1;
-    expect(() => new WorkerFactory(fn)).not.toThrow();
+    expect(() => new WorkerFactory(fn as WorkerFunction)).not.toThrow();
     const blobContent = blobParts[0][0] as string;
     expect(blobContent).toContain(fn.toString());
   });
 
   it('works with a named function', () => {
-    function compute(n: number) { return n * n; }
-    expect(() => new WorkerFactory(compute)).not.toThrow();
+    function compute(n: number) {
+      return n * n;
+    }
+    expect(() => new WorkerFactory(compute as WorkerFunction)).not.toThrow();
     const blobContent = blobParts[0][0] as string;
     expect(blobContent).toContain('compute');
   });
@@ -150,7 +157,7 @@ describe('WorkerFactory – edge cases', () => {
 
   it('works with a multi-param function', () => {
     const fn = (a: number, b: number) => a + b;
-    expect(() => new WorkerFactory(fn)).not.toThrow();
+    expect(() => new WorkerFactory(fn as WorkerFunction)).not.toThrow();
     const blobContent = blobParts[0][0] as string;
     expect(blobContent).toContain(fn.toString());
   });

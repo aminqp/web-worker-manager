@@ -24,7 +24,6 @@ export function mergeShards({ data }: { data: MergeInput }): unknown {
   const { strategy, shards } = Array.isArray(data) ? data[0] : data;
 
   switch (strategy) {
-
     case 'flatArray': {
       // Flatten array-of-arrays into one array
       return (shards as unknown[][]).flat();

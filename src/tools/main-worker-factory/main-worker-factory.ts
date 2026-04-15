@@ -14,7 +14,10 @@ import { WorkerFactory } from '../worker-factory';
  * Transferables (ArrayBuffer, MessagePort, ImageBitmap, OffscreenCanvas)
  * are zero-copy — they are moved to the worker instead of cloned.
  */
-export function extractTransferables(value: unknown, seen = new Set<object>()): Transferable[] {
+export function extractTransferables(
+  value: unknown,
+  seen = new Set<object>(),
+): Transferable[] {
   if (value === null || typeof value !== 'object') return [];
   if (seen.has(value as object)) return [];
   seen.add(value as object);
@@ -33,10 +36,12 @@ export function extractTransferables(value: unknown, seen = new Set<object>()): 
   }
 
   if (Array.isArray(value)) {
-    return value.flatMap(item => extractTransferables(item, seen));
+    return value.flatMap((item) => extractTransferables(item, seen));
   }
 
-  return Object.values(value as object).flatMap(v => extractTransferables(v, seen));
+  return Object.values(value as object).flatMap((v) =>
+    extractTransferables(v, seen),
+  );
 }
 
 class MainWorkerFactory {
@@ -83,7 +88,8 @@ class MainWorkerFactory {
     { srcData, ...otherParams }: { srcData: unknown } & Record<string, unknown>,
   ): Promise<PromiseSettledResult<WorkerResult>[]> {
     const config = this.findWorkerByName(workerName);
-    if (!config) return Promise.reject(new Error(`Worker "${workerName}" not found`));
+    if (!config)
+      return Promise.reject(new Error(`Worker "${workerName}" not found`));
 
     const threadCount = config.maxConcurrency ?? this._threads;
     const shouldPartition = Boolean(
@@ -115,9 +121,15 @@ class MainWorkerFactory {
     const { data: srcData, ...otherParams } = srcWorkerData;
 
     return Array.from({ length: threadCount }, (_, index) => {
-      const data = isPartitioned && Array.isArray(srcData) ? srcData[index] : srcData;
+      const data =
+        isPartitioned && Array.isArray(srcData) ? srcData[index] : srcData;
       return this.runWorkerWithRetry(
-        { workerFunc: config.func, workerName, index, data: { data, ...otherParams } },
+        {
+          workerFunc: config.func,
+          workerName,
+          index,
+          data: { data, ...otherParams },
+        },
         config.retries,
       );
     });
@@ -154,15 +166,26 @@ class MainWorkerFactory {
 
       raw.onerror = (event) => {
         raw.terminate();
-        reject({ index, workerConfigs: { workerFunc, workerName, index, data }, failedResult: event });
+        reject({
+          index,
+          workerConfigs: { workerFunc, workerName, index, data },
+          failedResult: event,
+        });
       };
 
       raw.onmessage = (event) => {
-        resolve({ index, workerConfigs: { workerFunc, workerName, index, data }, successResult: event });
+        resolve({
+          index,
+          workerConfigs: { workerFunc, workerName, index, data },
+          successResult: event,
+        });
         raw.terminate();
       };
 
-      const payload = { index, ...(Array.isArray(data) ? { data } : data) };
+      const payload = {
+        index,
+        ...(Array.isArray(data) ? { data } : (data as Record<string, unknown>)),
+      };
       raw.postMessage(payload, extractTransferables(payload));
     });
   }
@@ -187,10 +210,14 @@ class MainWorkerFactory {
     settled: PromiseSettledResult<WorkerResult>[],
     options: CollectOptions<T, R> = {},
   ): Promise<CollectedResult<R>> {
-    const fulfilled = settled.filter(r => r.status === 'fulfilled') as PromiseFulfilledResult<WorkerResult>[];
-    const errors    = settled.filter(r => r.status === 'rejected')  as PromiseRejectedResult[];
+    const fulfilled = settled.filter(
+      (r) => r.status === 'fulfilled',
+    ) as PromiseFulfilledResult<WorkerResult>[];
+    const errors = settled.filter(
+      (r) => r.status === 'rejected',
+    ) as PromiseRejectedResult[];
 
-    const shards = fulfilled.map(r => r.value.successResult!.data as T);
+    const shards = fulfilled.map((r) => r.value.successResult!.data as T);
 
     // Build a self-contained merge function for the worker
     const reducerSrc = options.reducer
@@ -209,7 +236,7 @@ class MainWorkerFactory {
           }
         });
       `;
-      const blob   = new Blob([workerSrc], { type: 'application/javascript' });
+      const blob = new Blob([workerSrc], { type: 'application/javascript' });
       const worker = new Worker(URL.createObjectURL(blob));
 
       worker.onmessage = (e) => {
@@ -217,7 +244,10 @@ class MainWorkerFactory {
         if (e.data.ok) resolve(e.data.data);
         else reject(new Error(e.data.error));
       };
-      worker.onerror = (e) => { worker.terminate(); reject(e); };
+      worker.onerror = (e) => {
+        worker.terminate();
+        reject(e);
+      };
       worker.postMessage(shards);
     });
 

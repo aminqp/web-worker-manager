@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import MainWorkerFactory from './main-worker-factory';
-import { WorkerConfig } from './types';
+import { WorkerConfig, WorkerResult } from './types';
 
 // ---------------------------------------------------------------------------
 // Mock WorkerFactory so no real Worker / Blob / URL.createObjectURL is needed
@@ -72,7 +72,10 @@ async function autoRespond(data: unknown = { result: 'ok' }) {
 beforeEach(() => {
   workerInstances.length = 0;
   vi.spyOn(console, 'error').mockImplementation(() => {});
-  Object.defineProperty(navigator, 'hardwareConcurrency', { value: 4, configurable: true });
+  Object.defineProperty(navigator, 'hardwareConcurrency', {
+    value: 4,
+    configurable: true,
+  });
 });
 
 // ── partitionArray ──────────────────────────────────────────────────────────
@@ -81,11 +84,18 @@ describe('partitionArray', () => {
   const factory = makeFactory([]);
 
   it('splits evenly', () => {
-    expect(factory.partitionArray([1, 2, 3, 4], 2)).toEqual([[1, 2], [3, 4]]);
+    expect(factory.partitionArray([1, 2, 3, 4], 2)).toEqual([
+      [1, 2],
+      [3, 4],
+    ]);
   });
 
   it('distributes remainder across leading chunks', () => {
-    expect(factory.partitionArray([1, 2, 3, 4, 5], 3)).toEqual([[1, 2], [3, 4], [5]]);
+    expect(factory.partitionArray([1, 2, 3, 4, 5], 3)).toEqual([
+      [1, 2],
+      [3, 4],
+      [5],
+    ]);
   });
 
   it('returns single chunk when numChunks === 1', () => {
@@ -103,8 +113,12 @@ describe('partitionArray', () => {
   });
 
   it('throws for numChunks <= 0', () => {
-    expect(() => factory.partitionArray([1, 2], 0)).toThrow('numChunks must be positive');
-    expect(() => factory.partitionArray([1, 2], -1)).toThrow('numChunks must be positive');
+    expect(() => factory.partitionArray([1, 2], 0)).toThrow(
+      'numChunks must be positive',
+    );
+    expect(() => factory.partitionArray([1, 2], -1)).toThrow(
+      'numChunks must be positive',
+    );
   });
 
   it('handles single-element array', () => {
@@ -116,7 +130,9 @@ describe('partitionArray', () => {
 
 describe('runWorker – positive', () => {
   it('resolves with fulfilled results for a known worker', async () => {
-    const factory = makeFactory([{ name: 'w1', role: 'computation', func: noop, maxConcurrency: 1 }]);
+    const factory = makeFactory([
+      { name: 'w1', role: 'computation', func: noop, maxConcurrency: 1 },
+    ]);
 
     const promise = factory.runWorker('w1', { srcData: { x: 1 } });
     await autoRespond({ value: 42 });
@@ -127,7 +143,9 @@ describe('runWorker – positive', () => {
   });
 
   it('passes srcData through to postMessage', async () => {
-    const factory = makeFactory([{ name: 'w1', role: 'computation', func: noop, maxConcurrency: 1 }]);
+    const factory = makeFactory([
+      { name: 'w1', role: 'computation', func: noop, maxConcurrency: 1 },
+    ]);
 
     const promise = factory.runWorker('w1', { srcData: { key: 'val' } });
     await autoRespond();
@@ -140,7 +158,9 @@ describe('runWorker – positive', () => {
   });
 
   it('spawns maxConcurrency workers', async () => {
-    const factory = makeFactory([{ name: 'w1', role: 'computation', func: noop, maxConcurrency: 3 }]);
+    const factory = makeFactory([
+      { name: 'w1', role: 'computation', func: noop, maxConcurrency: 3 },
+    ]);
 
     const promise = factory.runWorker('w1', { srcData: 'data' });
     await autoRespond();
@@ -150,7 +170,9 @@ describe('runWorker – positive', () => {
   });
 
   it('falls back to navigator.hardwareConcurrency when maxConcurrency is unset', async () => {
-    const factory = makeFactory([{ name: 'w1', role: 'computation', func: noop }]);
+    const factory = makeFactory([
+      { name: 'w1', role: 'computation', func: noop },
+    ]);
 
     const promise = factory.runWorker('w1', { srcData: 'x' });
     await autoRespond();
@@ -160,7 +182,9 @@ describe('runWorker – positive', () => {
   });
 
   it('terminates each worker after it responds', async () => {
-    const factory = makeFactory([{ name: 'w1', role: 'computation', func: noop, maxConcurrency: 2 }]);
+    const factory = makeFactory([
+      { name: 'w1', role: 'computation', func: noop, maxConcurrency: 2 },
+    ]);
 
     const promise = factory.runWorker('w1', { srcData: [1, 2] });
     await autoRespond();
@@ -171,7 +195,13 @@ describe('runWorker – positive', () => {
 
   it('partitions array data across workers', async () => {
     const factory = makeFactory([
-      { name: 'w1', role: 'computation', func: noop, maxConcurrency: 2, partition: true },
+      {
+        name: 'w1',
+        role: 'computation',
+        func: noop,
+        maxConcurrency: 2,
+        partition: true,
+      },
     ]);
 
     const promise = factory.runWorker('w1', { srcData: [1, 2, 3, 4] });
@@ -185,7 +215,13 @@ describe('runWorker – positive', () => {
 
   it('does not partition when partition flag is false', async () => {
     const factory = makeFactory([
-      { name: 'w1', role: 'computation', func: noop, maxConcurrency: 2, partition: false },
+      {
+        name: 'w1',
+        role: 'computation',
+        func: noop,
+        maxConcurrency: 2,
+        partition: false,
+      },
     ]);
 
     const arr = [1, 2, 3, 4];
@@ -195,14 +231,22 @@ describe('runWorker – positive', () => {
 
     // both workers receive the full array
     workerInstances.forEach((w) =>
-      expect(w.postMessage).toHaveBeenCalledWith(expect.objectContaining({ data: arr }), expect.any(Array)),
+      expect(w.postMessage).toHaveBeenCalledWith(
+        expect.objectContaining({ data: arr }),
+        expect.any(Array),
+      ),
     );
   });
 
   it('forwards extra params alongside data', async () => {
-    const factory = makeFactory([{ name: 'w1', role: 'computation', func: noop, maxConcurrency: 1 }]);
+    const factory = makeFactory([
+      { name: 'w1', role: 'computation', func: noop, maxConcurrency: 1 },
+    ]);
 
-    const promise = factory.runWorker('w1', { srcData: { v: 1 }, options: { flag: true } });
+    const promise = factory.runWorker('w1', {
+      srcData: { v: 1 },
+      options: { flag: true },
+    });
     await autoRespond();
     await promise;
 
@@ -225,7 +269,13 @@ describe('runWorker – error handling', () => {
 
   it('returns fulfilled after retry on transient failure', async () => {
     const factory = makeFactory([
-      { name: 'w1', role: 'computation', func: noop, maxConcurrency: 1, retries: 1 },
+      {
+        name: 'w1',
+        role: 'computation',
+        func: noop,
+        maxConcurrency: 1,
+        retries: 1,
+      },
     ]);
 
     const promise = factory.runWorker('w1', { srcData: {} });
@@ -243,7 +293,13 @@ describe('runWorker – error handling', () => {
 
   it('returns rejected result after exhausting all retries', async () => {
     const factory = makeFactory([
-      { name: 'w1', role: 'computation', func: noop, maxConcurrency: 1, retries: 1 },
+      {
+        name: 'w1',
+        role: 'computation',
+        func: noop,
+        maxConcurrency: 1,
+        retries: 1,
+      },
     ]);
 
     const promise = factory.runWorker('w1', { srcData: {} });
@@ -261,7 +317,13 @@ describe('runWorker – error handling', () => {
 
   it('includes failedResult on worker error', async () => {
     const factory = makeFactory([
-      { name: 'w1', role: 'computation', func: noop, maxConcurrency: 1, retries: 0 },
+      {
+        name: 'w1',
+        role: 'computation',
+        func: noop,
+        maxConcurrency: 1,
+        retries: 0,
+      },
     ]);
 
     const promise = factory.runWorker('w1', { srcData: {} });
@@ -281,7 +343,13 @@ describe('runWorker – error handling', () => {
 describe('runWorker – edge cases', () => {
   it('does not partition a single-element array', async () => {
     const factory = makeFactory([
-      { name: 'w1', role: 'computation', func: noop, maxConcurrency: 2, partition: true },
+      {
+        name: 'w1',
+        role: 'computation',
+        func: noop,
+        maxConcurrency: 2,
+        partition: true,
+      },
     ]);
 
     const promise = factory.runWorker('w1', { srcData: [42] });
@@ -290,13 +358,22 @@ describe('runWorker – edge cases', () => {
 
     // srcData.length === 1 → shouldPartition is false → full array sent
     workerInstances.forEach((w) =>
-      expect(w.postMessage).toHaveBeenCalledWith(expect.objectContaining({ data: [42] }), expect.any(Array)),
+      expect(w.postMessage).toHaveBeenCalledWith(
+        expect.objectContaining({ data: [42] }),
+        expect.any(Array),
+      ),
     );
   });
 
   it('handles non-array srcData with partition: true gracefully', async () => {
     const factory = makeFactory([
-      { name: 'w1', role: 'computation', func: noop, maxConcurrency: 2, partition: true },
+      {
+        name: 'w1',
+        role: 'computation',
+        func: noop,
+        maxConcurrency: 2,
+        partition: true,
+      },
     ]);
 
     const promise = factory.runWorker('w1', { srcData: { scalar: true } });
@@ -313,7 +390,13 @@ describe('runWorker – edge cases', () => {
 
   it('handles empty array srcData', async () => {
     const factory = makeFactory([
-      { name: 'w1', role: 'computation', func: noop, maxConcurrency: 2, partition: true },
+      {
+        name: 'w1',
+        role: 'computation',
+        func: noop,
+        maxConcurrency: 2,
+        partition: true,
+      },
     ]);
 
     const promise = factory.runWorker('w1', { srcData: [] });
@@ -322,7 +405,10 @@ describe('runWorker – edge cases', () => {
 
     // empty array → shouldPartition false → raw [] forwarded
     workerInstances.forEach((w) =>
-      expect(w.postMessage).toHaveBeenCalledWith(expect.objectContaining({ data: [] }), expect.any(Array)),
+      expect(w.postMessage).toHaveBeenCalledWith(
+        expect.objectContaining({ data: [] }),
+        expect.any(Array),
+      ),
     );
   });
 
@@ -337,7 +423,7 @@ describe('runWorker – edge cases', () => {
 
     const indices = results
       .filter((r) => r.status === 'fulfilled')
-      .map((r) => (r as PromiseFulfilledResult<any>).value.index);
+      .map((r) => (r as PromiseFulfilledResult<WorkerResult>).value.index);
 
     expect(indices).toEqual([0, 1, 2]);
   });

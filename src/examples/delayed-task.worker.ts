@@ -13,8 +13,12 @@ export interface DelayedTaskResult {
  * Blocks the worker thread for `delayMs` milliseconds (busy-wait so it's
  * truly CPU-visible, not just a timer), then returns a result envelope.
  */
-export function runDelayedTask({ data }: {
-  data: { taskId: string; delayMs: number; payload: unknown } | { taskId: string; delayMs: number; payload: unknown }[];
+export function runDelayedTask({
+  data,
+}: {
+  data:
+    | { taskId: string; delayMs: number; payload: unknown }
+    | { taskId: string; delayMs: number; payload: unknown }[];
 }): DelayedTaskResult {
   // when partitioned, each shard arrives as a single-element array
   const task = Array.isArray(data) ? data[0] : data;
@@ -23,7 +27,9 @@ export function runDelayedTask({ data }: {
   const startedAt = new Date().toISOString();
   const start = Date.now();
 
-  while (Date.now() - start < delayMs) { /* intentional spin */ }
+  while (Date.now() - start < delayMs) {
+    /* intentional spin */
+  }
 
   return {
     taskId,
@@ -37,7 +43,9 @@ export function runDelayedTask({ data }: {
 /**
  * Generates a batch of delayed task descriptors with varying delays.
  */
-export function generateDelayedTasks({ data: { count, minMs = 2000, maxMs = 8000 } }: {
+export function generateDelayedTasks({
+  data: { count, minMs = 2000, maxMs = 8000 },
+}: {
   data: { count: number; minMs?: number; maxMs?: number };
 }): { taskId: string; delayMs: number; payload: unknown }[] {
   const categories = ['report', 'export', 'sync', 'backup', 'index'];

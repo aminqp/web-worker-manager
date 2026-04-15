@@ -5,10 +5,12 @@ import initiator from '../workers/initiator';
 function makeSelfMock() {
   const listeners: Record<string, ((e: MessageEvent) => void)[]> = {};
   return {
-    addEventListener: vi.fn((type: string, handler: (e: MessageEvent) => void) => {
-      listeners[type] = listeners[type] ?? [];
-      listeners[type].push(handler);
-    }),
+    addEventListener: vi.fn(
+      (type: string, handler: (e: MessageEvent) => void) => {
+        listeners[type] = listeners[type] ?? [];
+        listeners[type].push(handler);
+      },
+    ),
     postMessage: vi.fn(),
     dispatch(type: string, data: unknown) {
       listeners[type]?.forEach((fn) => fn({ data } as MessageEvent));
@@ -29,7 +31,10 @@ describe('initiator', () => {
 
   it('registers a message event listener on self', () => {
     initiator();
-    expect(selfMock.addEventListener).toHaveBeenCalledWith('message', expect.any(Function));
+    expect(selfMock.addEventListener).toHaveBeenCalledWith(
+      'message',
+      expect.any(Function),
+    );
   });
 
   it('echoes back a string payload', () => {

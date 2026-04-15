@@ -9,8 +9,15 @@ export interface TransformOptions {
   join?: string;
 }
 
-export function transformArray<T>(params: { data: T[]; index: number; options: TransformOptions }): any[] {
-  function transformItem<T>(item: T, options: TransformOptions): any {
+export function transformArray<T>(params: {
+  data: T[];
+  index: number;
+  options: TransformOptions;
+}): (number | string)[] {
+  function transformItem<T>(
+    item: T,
+    options: TransformOptions,
+  ): number | string {
     if (typeof item === 'number') {
       return transformNumber(item as number, options);
     } else if (typeof item === 'string') {
@@ -18,14 +25,17 @@ export function transformArray<T>(params: { data: T[]; index: number; options: T
     }
 
     // Apply prefix and suffix to all types
-    let result = item;
+    let result: number | string = String(item);
     result = applyPrefix(result, options.prefix);
     result = applySuffix(result, options.suffix);
 
     return result;
   }
 
-  function transformNumber(value: number, options: TransformOptions): any {
+  function transformNumber(
+    value: number,
+    options: TransformOptions,
+  ): number | string {
     let transformed = value;
     const probability = Math.random();
 
@@ -55,9 +65,10 @@ export function transformArray<T>(params: { data: T[]; index: number; options: T
   function applyMultiplier(value: number, optionMultiplier: number): number {
     const probability = Math.random();
     // Either use the provided multiplier or a random one
-    const actualMultiplier = probability < 0.25
-      ? optionMultiplier
-      : (Math.random() * 10) * (Math.random() < 0.5 ? 1 : -1);
+    const actualMultiplier =
+      probability < 0.25
+        ? optionMultiplier
+        : Math.random() * 10 * (Math.random() < 0.5 ? 1 : -1);
 
     return value * actualMultiplier;
   }
@@ -70,10 +81,11 @@ export function transformArray<T>(params: { data: T[]; index: number; options: T
       (n: number) => n + Math.floor(Math.random() * 100),
       (n: number) => n - Math.floor(Math.random() * 100),
       (n: number) => 1 / (n !== 0 ? n : 1), // Inverse, avoiding division by zero
-      (n: number) => Math.abs(n)
+      (n: number) => Math.abs(n),
     ];
 
-    const randomOperation = operations[Math.floor(Math.random() * operations.length)];
+    const randomOperation =
+      operations[Math.floor(Math.random() * operations.length)];
     return randomOperation(value);
   }
 
@@ -84,10 +96,11 @@ export function transformArray<T>(params: { data: T[]; index: number; options: T
       Math.ceil,
       (n: number) => Number(n.toFixed(1)),
       (n: number) => Number(n.toFixed(2)),
-      (n: number) => Number(n.toFixed(3))
+      (n: number) => Number(n.toFixed(3)),
     ];
 
-    const randomRounding = roundingMethods[Math.floor(Math.random() * roundingMethods.length)];
+    const randomRounding =
+      roundingMethods[Math.floor(Math.random() * roundingMethods.length)];
     return randomRounding(value);
   }
 
@@ -100,16 +113,19 @@ export function transformArray<T>(params: { data: T[]; index: number; options: T
       (c: string, n: number) => {
         const formatted = new Intl.NumberFormat('en-US', {
           minimumFractionDigits: 2,
-          maximumFractionDigits: 2
+          maximumFractionDigits: 2,
         }).format(n);
         return `${c}${formatted}`;
-      }
+      },
     ];
 
     // Randomly choose a currency symbol if none provided
     const currencies = ['$', '€', '£', '¥', '₹'];
-    const currencySymbol = currencyOption || currencies[Math.floor(Math.random() * currencies.length)];
-    const randomFormat = currencyFormats[Math.floor(Math.random() * currencyFormats.length)];
+    const currencySymbol =
+      currencyOption ||
+      currencies[Math.floor(Math.random() * currencies.length)];
+    const randomFormat =
+      currencyFormats[Math.floor(Math.random() * currencyFormats.length)];
 
     return randomFormat(currencySymbol, value);
   }
@@ -138,18 +154,23 @@ export function transformArray<T>(params: { data: T[]; index: number; options: T
   }
 
   function transformToTitleCase(value: string): string {
-    return value.split(' ')
-      .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+    return value
+      .split(' ')
+      .map((word) => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
       .join(' ');
   }
 
   function transformToAlternatingCase(value: string): string {
-    return value.split('')
-      .map((char, i) => i % 2 === 0 ? char.toLowerCase() : char.toUpperCase())
+    return value
+      .split('')
+      .map((char, i) => (i % 2 === 0 ? char.toLowerCase() : char.toUpperCase()))
       .join('');
   }
 
-  function applyPrefix(value: any, prefix?: string): any {
+  function applyPrefix(
+    value: number | string,
+    prefix?: string,
+  ): number | string {
     if (!prefix || Math.random() <= 0.2) {
       return value;
     }
@@ -159,14 +180,18 @@ export function transformArray<T>(params: { data: T[]; index: number; options: T
       prefix.repeat(Math.floor(Math.random() * 3) + 1),
       prefix.toUpperCase(),
       prefix.toLowerCase(),
-      prefix + Math.floor(Math.random() * 100)
+      prefix + Math.floor(Math.random() * 100),
     ];
 
-    const randomPrefix = prefixVariations[Math.floor(Math.random() * prefixVariations.length)];
+    const randomPrefix =
+      prefixVariations[Math.floor(Math.random() * prefixVariations.length)];
     return `${randomPrefix}${value}`;
   }
 
-  function applySuffix(value: any, suffix?: string): any {
+  function applySuffix(
+    value: number | string,
+    suffix?: string,
+  ): number | string {
     if (!suffix || Math.random() <= 0.2) {
       return value;
     }
@@ -176,10 +201,11 @@ export function transformArray<T>(params: { data: T[]; index: number; options: T
       suffix.repeat(Math.floor(Math.random() * 3) + 1),
       suffix.toUpperCase(),
       suffix.toLowerCase(),
-      Math.floor(Math.random() * 100) + suffix
+      Math.floor(Math.random() * 100) + suffix,
     ];
 
-    const randomSuffix = suffixVariations[Math.floor(Math.random() * suffixVariations.length)];
+    const randomSuffix =
+      suffixVariations[Math.floor(Math.random() * suffixVariations.length)];
     return `${value}${randomSuffix}`;
   }
 
@@ -194,5 +220,3 @@ export function transformArray<T>(params: { data: T[]; index: number; options: T
 
   return result;
 }
-
-

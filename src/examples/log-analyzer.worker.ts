@@ -24,13 +24,49 @@ export interface LogReport {
  * Generates a realistic server log dataset.
  */
 export function generateLogs({ count }: { count: number }): LogEntry[] {
-  const services = ['auth-service', 'payment-api', 'user-service', 'notification', 'search-engine', 'cdn'];
-  const levels: LogLevel[] = ['DEBUG', 'INFO', 'INFO', 'INFO', 'WARN', 'ERROR', 'FATAL'];
+  const services = [
+    'auth-service',
+    'payment-api',
+    'user-service',
+    'notification',
+    'search-engine',
+    'cdn',
+  ];
+  const levels: LogLevel[] = [
+    'DEBUG',
+    'INFO',
+    'INFO',
+    'INFO',
+    'WARN',
+    'ERROR',
+    'FATAL',
+  ];
   const messages = {
-    DEBUG: ['Cache miss for key', 'DB query executed', 'Token validated', 'Session refreshed'],
-    INFO:  ['Request completed', 'User logged in', 'Payment processed', 'Email sent', 'Search indexed'],
-    WARN:  ['High memory usage', 'Slow query detected', 'Rate limit approaching', 'Retry attempt'],
-    ERROR: ['Connection timeout', 'Invalid credentials', 'Payment declined', 'Service unavailable'],
+    DEBUG: [
+      'Cache miss for key',
+      'DB query executed',
+      'Token validated',
+      'Session refreshed',
+    ],
+    INFO: [
+      'Request completed',
+      'User logged in',
+      'Payment processed',
+      'Email sent',
+      'Search indexed',
+    ],
+    WARN: [
+      'High memory usage',
+      'Slow query detected',
+      'Rate limit approaching',
+      'Retry attempt',
+    ],
+    ERROR: [
+      'Connection timeout',
+      'Invalid credentials',
+      'Payment declined',
+      'Service unavailable',
+    ],
     FATAL: ['Out of memory', 'Database unreachable', 'Unhandled exception'],
   };
 
@@ -40,16 +76,28 @@ export function generateLogs({ count }: { count: number }): LogEntry[] {
     const service = services[Math.floor(Math.random() * services.length)];
     const msgPool = messages[level];
     const message = msgPool[Math.floor(Math.random() * msgPool.length)];
-    const ts = new Date(now - (count - i) * 200 - Math.random() * 100).toISOString();
+    const ts = new Date(
+      now - (count - i) * 200 - Math.random() * 100,
+    ).toISOString();
 
     return {
       timestamp: ts,
       level,
       service,
       message,
-      durationMs: level === 'DEBUG' ? undefined : Math.floor(Math.random() * 2000) + 10,
-      statusCode: ['INFO', 'DEBUG'].includes(level) ? 200 : level === 'WARN' ? 429 : level === 'ERROR' ? 500 : 503,
-      userId: Math.random() > 0.3 ? `user-${Math.floor(Math.random() * 100000)}` : undefined,
+      durationMs:
+        level === 'DEBUG' ? undefined : Math.floor(Math.random() * 2000) + 10,
+      statusCode: ['INFO', 'DEBUG'].includes(level)
+        ? 200
+        : level === 'WARN'
+          ? 429
+          : level === 'ERROR'
+            ? 500
+            : 503,
+      userId:
+        Math.random() > 0.3
+          ? `user-${Math.floor(Math.random() * 100000)}`
+          : undefined,
     };
   });
 }
@@ -72,7 +120,11 @@ export function analyzeLogs({ data }: { data: LogEntry[] }): LogReport {
     if (entry.durationMs !== undefined) {
       durations.push(entry.durationMs);
       if (entry.durationMs > 800) {
-        slowest.push({ service: entry.service, durationMs: entry.durationMs, message: entry.message });
+        slowest.push({
+          service: entry.service,
+          durationMs: entry.durationMs,
+          message: entry.message,
+        });
       }
     }
 
@@ -83,7 +135,9 @@ export function analyzeLogs({ data }: { data: LogEntry[] }): LogReport {
 
   const total = data.length;
   const errors = byLevel.ERROR + byLevel.FATAL;
-  const avgDurationMs = durations.length ? durations.reduce((a, b) => a + b, 0) / durations.length : 0;
+  const avgDurationMs = durations.length
+    ? durations.reduce((a, b) => a + b, 0) / durations.length
+    : 0;
 
   const topErrors = Object.entries(errorMessages)
     .sort((a, b) => b[1] - a[1])

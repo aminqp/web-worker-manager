@@ -3,7 +3,7 @@
  * @param count Number of data items to generate
  * @returns Array of random data elements
  */
-export function generateRandomData({ count = 100 }): any[] {
+export function generateRandomData({ count = 100 }): unknown[] {
   /**
    * Generates a random number
    */
@@ -244,7 +244,7 @@ export function generateRandomData({ count = 100 }): any[] {
   /**
    * Generates a random array
    */
-  function generateRandomArray(): any[] {
+  function generateRandomArray(): unknown[] {
     // Determine array length (mostly short arrays)
     const length =
       Math.random() < 0.8
@@ -315,7 +315,7 @@ export function generateRandomData({ count = 100 }): any[] {
     return Math.random() < 0.5 ? null : undefined;
   }
 
-  const result: any[] = [];
+  const result: unknown[] = [];
 
   // Define data type generators
   const generators = [
