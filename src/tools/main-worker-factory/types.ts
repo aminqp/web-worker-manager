@@ -36,3 +36,29 @@ export interface WorkerResult {
   successResult?: WorkerSuccessResult,
   failedResult?: WorkerFailedResult,
 }
+
+/** Options for collectResults */
+export interface CollectOptions<T, R = T[]> {
+  /**
+   * Custom reducer applied to the array of fulfilled shard values.
+   * Runs inside a worker — must be self-contained (no external references).
+   * Defaults to a flat array of all shard data values.
+   *
+   * @example
+   * // sum all numbers across shards
+   * reducer: (shards) => shards.flat().reduce((a, b) => a + b, 0)
+   */
+  reducer?: (shards: T[]) => R;
+}
+
+/** Result returned by collectResults */
+export interface CollectedResult<R> {
+  /** The merged output produced by the reducer */
+  data: R;
+  /** Number of shards that succeeded */
+  succeeded: number;
+  /** Number of shards that failed (after all retries) */
+  failed: number;
+  /** Raw rejected results, if any */
+  errors: PromiseRejectedResult[];
+}

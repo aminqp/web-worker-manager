@@ -1,40 +1,290 @@
 <!doctype html>
 <html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <link rel="icon" type="image/svg+xml" href="/webstorm-icon-logo.svg" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>WS playground</title>
-  <link rel="stylesheet" href="/style.css">
-</head>
-<body>
-<header class="logo">
-  <a href="https://www.jetbrains.com/webstorm/">
-    <img src="/webstorm-logo.svg" alt="WebStorm logo" width="344"
-         height="90">
-  </a>
-</header>
-<main id="app">
-  <h1 class="title">
-    Thank you for trying it out. <br /> Your first project is up and running
-    now.
-  </h1>
-  <section class="counter">
-    <div class="counter-info">
-      <p class="counter-text">Counter is</p>
-      <p class="counter-value" id="counter-value"></p>
-    </div>
-    <div class="counter-interaction">
-      <button id="increaseByOne" type="button">+1</button>
-      <button id="increaseByTwo" type="button">+2</button>
-      <button id="decreaseByOne" type="button">-1</button>
-      <button id="decreaseByTwo" type="button">-2</button>
-    </div>
-  </section>
-</main>
-<footer class="technologies">
-  <img src="/technologies.svg" alt="List of supported technologies">
-</footer>
-<script type="module" src="/src/main.ts"></script>
-</body>
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/logo.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>MainWorkerFactory — Demo</title>
+    <link rel="stylesheet" href="/style.css" />
+    <link rel="stylesheet" href="/demo.css" />
+  </head>
+  <body>
+    <header class="logo">
+      <img src="/logo.svg" alt="MainWorkerFactory logo" />
+    </header>
+
+    <main id="app">
+      <h1 class="title">MainWorkerFactory Demo</h1>
+      <p class="subtitle">
+        Each card runs one or more workers via <code>foreman.runWorker()</code>.
+        The UI stays responsive throughout.
+      </p>
+
+      <div class="cards">
+        <!-- Benchmark card -->
+        <div class="card card-bench">
+          <div class="card-header">
+            <span class="card-tag">Benchmark</span>
+            <h2 class="card-title">Main Thread vs Worker Threads</h2>
+            <p class="card-desc">
+              Runs 6 × 350×350 matrix multiplications twice — first sequentially
+              on the main thread (UI freezes), then in parallel across 6 workers
+              (UI stays live). Each task takes ~1 s, so main thread = ~6 s vs
+              workers = ~1 s.
+            </p>
+          </div>
+          <div class="card-meta">
+            <span>Worker: <code>multiplyMatrices</code></span>
+            <span
+              >Tasks: <code>6 × 350×350 matrix multiply (~1 s each)</code></span
+            >
+            <span>Concurrency: <code>6</code></span>
+          </div>
+          <button id="btn-bench" type="button" class="run-btn">
+            Run benchmark
+          </button>
+          <div class="card-status" id="status-bench">idle</div>
+
+          <div class="bench-bars">
+            <div class="bench-row">
+              <span class="bench-label">Main thread</span>
+              <div class="bench-track">
+                <div
+                  class="bench-bar bench-bar--main"
+                  id="bench-bar-main"
+                ></div>
+              </div>
+              <span class="bench-time" id="bench-main-time">—</span>
+            </div>
+            <div class="bench-row">
+              <span class="bench-label">Workers</span>
+              <div class="bench-track">
+                <div
+                  class="bench-bar bench-bar--worker"
+                  id="bench-bar-worker"
+                ></div>
+              </div>
+              <span class="bench-time" id="bench-worker-time">—</span>
+            </div>
+            <div class="bench-speedup" id="bench-speedup"></div>
+          </div>
+
+          <pre class="card-result" id="result-bench"></pre>
+        </div>
+
+        <!-- CPU-bound -->
+        <div class="card">
+          <div class="card-header">
+            <span class="card-tag">CPU-bound</span>
+            <h2 class="card-title">Expensive Computation</h2>
+            <p class="card-desc">
+              Busy-waits for ~10 s in a dedicated worker. The page stays
+              interactive the whole time.
+            </p>
+          </div>
+          <div class="card-meta">
+            <span>Worker: <code>exp1</code></span>
+            <span>Retries: <code>3</code></span>
+          </div>
+          <button id="btn-exp1" type="button" class="run-btn">Run</button>
+          <div class="card-status" id="status-exp1">idle</div>
+          <pre class="card-result" id="result-exp1"></pre>
+        </div>
+
+        <div class="card">
+          <div class="card-header">
+            <span class="card-tag">Data generation</span>
+            <h2 class="card-title">Generate Random Data</h2>
+            <p class="card-desc">
+              Generates 300 000 mixed-type items across 13 concurrent workers.
+            </p>
+          </div>
+          <div class="card-meta">
+            <span>Worker: <code>generateRandomData</code></span>
+            <span>Concurrency: <code>13</code></span>
+          </div>
+          <button id="btn-gen" type="button" class="run-btn">Run</button>
+          <div class="card-status" id="status-gen">idle</div>
+          <pre class="card-result" id="result-gen"></pre>
+        </div>
+
+        <div class="card">
+          <div class="card-header">
+            <span class="card-tag">Partition + transform</span>
+            <h2 class="card-title">Transform Array</h2>
+            <p class="card-desc">
+              Generates 300 000 items then partitions and transforms them across
+              8 workers with prefix / suffix / currency options.
+            </p>
+          </div>
+          <div class="card-meta">
+            <span
+              >Pipeline: <code>generateRandomData → transformArray</code></span
+            >
+            <span>Concurrency: <code>8</code></span>
+          </div>
+          <button id="btn-transform" type="button" class="run-btn">Run</button>
+          <div class="card-status" id="status-transform">idle</div>
+          <pre class="card-result" id="result-transform"></pre>
+        </div>
+
+        <div class="card">
+          <div class="card-header">
+            <span class="card-tag">Structured data</span>
+            <h2 class="card-title">Large List Transform</h2>
+            <p class="card-desc">
+              Generates 30 000 user records then normalises names, rates,
+              emails, dates and prices across workers.
+            </p>
+          </div>
+          <div class="card-meta">
+            <span
+              >Pipeline:
+              <code
+                >generateListTransformArrayTestData → listTransformArray</code
+              ></span
+            >
+            <span>Concurrency: <code>10</code></span>
+          </div>
+          <button id="btn-list" type="button" class="run-btn">Run</button>
+          <div class="card-status" id="status-list">idle</div>
+          <pre class="card-result" id="result-list"></pre>
+        </div>
+
+        <div class="card">
+          <div class="card-header">
+            <span class="card-tag">Heavy data processing</span>
+            <h2 class="card-title">Image Processing Pipeline</h2>
+            <p class="card-desc">
+              Generates 4 synthetic 512×512 RGBA images (noise), then runs a
+              greyscale pass followed by a 3×3 box-blur kernel on each — all off
+              the main thread. Simulates a real photo-editing or CV pipeline.
+            </p>
+          </div>
+          <div class="card-meta">
+            <span
+              >Pipeline: <code>generateImageData → processImageData</code></span
+            >
+            <span>Images: <code>4 × 512×512 px</code></span>
+            <span>Concurrency: <code>8</code></span>
+          </div>
+          <button id="btn-image" type="button" class="run-btn">Run</button>
+          <div class="card-status" id="status-image">idle</div>
+          <pre class="card-result" id="result-image"></pre>
+        </div>
+
+        <div class="card">
+          <div class="card-header">
+            <span class="card-tag">Long list data transform</span>
+            <h2 class="card-title">Server Log Analyser</h2>
+            <p class="card-desc">
+              Generates 500 000 realistic server log entries (auth, payments,
+              search…), then partitions and analyses them across 8 workers —
+              computing error rates, avg latency, slowest requests and top
+              errors. Simulates a monitoring dashboard.
+            </p>
+          </div>
+          <div class="card-meta">
+            <span>Pipeline: <code>generateLogs → analyzeLogs</code></span>
+            <span>Volume: <code>500 000 entries</code></span>
+            <span>Concurrency: <code>8</code></span>
+          </div>
+          <button id="btn-logs" type="button" class="run-btn">Run</button>
+          <div class="card-status" id="status-logs">idle</div>
+          <pre class="card-result" id="result-logs"></pre>
+        </div>
+
+        <div class="card">
+          <div class="card-header">
+            <span class="card-tag">Long delayed task</span>
+            <h2 class="card-title">Concurrent Batch Jobs</h2>
+            <p class="card-desc">
+              Spawns 6 independent tasks (report, export, sync, backup…) each
+              with a random 2–5 s delay, running concurrently across 6 workers.
+              Simulates a job queue where tasks must not block each other or the
+              UI.
+            </p>
+          </div>
+          <div class="card-meta">
+            <span
+              >Pipeline:
+              <code>generateDelayedTasks → runDelayedTask</code></span
+            >
+            <span>Tasks: <code>6 × 2–5 s</code></span>
+            <span>Concurrency: <code>6</code></span>
+          </div>
+          <button id="btn-delayed" type="button" class="run-btn">Run</button>
+          <div class="card-status" id="status-delayed">idle</div>
+          <pre class="card-result" id="result-delayed"></pre>
+        </div>
+
+        <div class="card">
+          <div class="card-header">
+            <span class="card-tag">Error handling</span>
+            <h2 class="card-title">Flaky Tasks + Auto-Retry</h2>
+            <p class="card-desc">
+              Runs 8 tasks where half have a 70% failure rate. The framework
+              retries each failed shard up to 3 times. Shows which tasks
+              eventually succeeded and which exhausted all retries.
+            </p>
+          </div>
+          <div class="card-meta">
+            <span>Pipeline: <code>generateFlakyTasks → flakyTask</code></span>
+            <span>Retries: <code>3 per shard</code></span>
+            <span>Concurrency: <code>8</code></span>
+          </div>
+          <button id="btn-flaky" type="button" class="run-btn">Run</button>
+          <div class="card-status" id="status-flaky">idle</div>
+          <pre class="card-result" id="result-flaky"></pre>
+        </div>
+
+        <div class="card">
+          <div class="card-header">
+            <span class="card-tag">Network I/O</span>
+            <h2 class="card-title">Fetch &amp; Enrich Posts</h2>
+            <p class="card-desc">
+              Fetches 20 posts from a public REST API inside a worker, then
+              enriches each post with a word-count and title-cased heading —
+              without touching the main thread.
+            </p>
+          </div>
+          <div class="card-meta">
+            <span>Worker: <code>fetchAndEnrichPosts</code></span>
+            <span>Source: <code>jsonplaceholder.typicode.com</code></span>
+            <span>Concurrency: <code>1</code></span>
+          </div>
+          <button id="btn-fetch" type="button" class="run-btn">Run</button>
+          <div class="card-status" id="status-fetch">idle</div>
+          <pre class="card-result" id="result-fetch"></pre>
+        </div>
+
+        <div class="card">
+          <div class="card-header">
+            <span class="card-tag">Partial results</span>
+            <h2 class="card-title">Distributed Search (Shard Failures)</h2>
+            <p class="card-desc">
+              Queries 8 search shards concurrently. Every 3rd shard is
+              intentionally unavailable. Results from healthy shards are merged
+              and ranked — the UI shows partial data rather than a full failure.
+            </p>
+          </div>
+          <div class="card-meta">
+            <span
+              >Pipeline: <code>generateSearchShards → searchShard</code></span
+            >
+            <span>Shards: <code>8 (every 3rd fails)</code></span>
+            <span>Retries: <code>0 — fail fast</code></span>
+          </div>
+          <button id="btn-partial" type="button" class="run-btn">Run</button>
+          <div class="card-status" id="status-partial">idle</div>
+          <pre class="card-result" id="result-partial"></pre>
+        </div>
+      </div>
+    </main>
+
+    <footer class="technologies">
+      <img src="/technologies.svg" alt="List of supported technologies" />
+    </footer>
+    <script type="module" src="/src/main.ts"></script>
+  </body>
 </html>

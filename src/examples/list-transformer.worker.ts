@@ -183,7 +183,6 @@ export function transformArray<T>(params: { data: T[]; index: number; options: T
     return `${value}${randomSuffix}`;
   }
 
-  console.log('\n\n <<<<  transformArray >>>> => params -> ', params);
   const { data, options } = params;
 
   let result = data.map((item) => transformItem(item, options));

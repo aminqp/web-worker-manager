@@ -1,0 +1,244 @@
+/* ── layout ── */
+.subtitle {
+  font-size: 15px;
+  color: rgba(255, 255, 255, 0.55);
+  margin: -20px 0 36px;
+}
+
+.subtitle code {
+  font-family: 'JetBrains Mono', monospace;
+  color: rgba(1, 197, 245, 0.9);
+}
+
+.cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 20px;
+  padding: 0 20px 40px;
+  max-width: 1280px;
+  margin: 0 auto;
+  text-align: left;
+}
+
+/* ── card ── */
+.card {
+  background: rgba(25, 25, 28, 0.7);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 16px;
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.card-header {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.card-tag {
+  font-size: 11px;
+  font-family: 'JetBrains Mono', monospace;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: rgba(1, 197, 245, 0.8);
+}
+
+.card-title {
+  font-size: 18px;
+  font-weight: 500;
+  margin: 0;
+}
+
+.card-desc {
+  font-size: 13px;
+  color: rgba(255, 255, 255, 0.5);
+  margin: 0;
+  line-height: 1.5;
+}
+
+.card-meta {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-size: 12px;
+  color: rgba(255, 255, 255, 0.4);
+  font-family: 'JetBrains Mono', monospace;
+}
+
+.card-meta code {
+  color: rgba(255, 255, 255, 0.7);
+}
+
+/* ── run button ── */
+.run-btn {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 14px;
+  padding: 10px 20px;
+  border-radius: 8px;
+  border: 1px solid rgba(76, 166, 255, 0.35);
+  background: rgba(1, 126, 254, 0.15);
+  color: rgba(255, 255, 255, 0.9);
+  cursor: pointer;
+  transition:
+    background 0.2s,
+    border-color 0.2s;
+  align-self: flex-start;
+}
+
+.run-btn:hover:not(:disabled) {
+  background: rgba(1, 126, 254, 0.3);
+  border-color: rgba(76, 166, 255, 0.6);
+  background-image: none;
+}
+
+.run-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+/* ── status badge ── */
+.card-status {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 12px;
+  padding: 4px 10px;
+  border-radius: 20px;
+  align-self: flex-start;
+  background: rgba(255, 255, 255, 0.06);
+  color: rgba(255, 255, 255, 0.45);
+  transition:
+    background 0.2s,
+    color 0.2s;
+}
+
+.card-status.running {
+  background: rgba(1, 197, 245, 0.15);
+  color: rgba(1, 197, 245, 0.9);
+}
+
+.card-status.done {
+  background: rgba(50, 215, 75, 0.15);
+  color: rgba(50, 215, 75, 0.9);
+}
+
+.card-status.error {
+  background: rgba(255, 69, 58, 0.15);
+  color: rgba(255, 69, 58, 0.9);
+}
+
+/* ── result preview ── */
+.card-result {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  color: rgba(255, 255, 255, 0.55);
+  background: rgba(0, 0, 0, 0.3);
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  border-radius: 8px;
+  padding: 10px 12px;
+  margin: 0;
+  min-height: 48px;
+  max-height: 160px;
+  overflow-y: auto;
+  white-space: pre-wrap;
+  word-break: break-all;
+  display: none;
+}
+
+.card-result.visible {
+  display: block;
+}
+
+/* ── section label ── */
+.section-label {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: rgba(255, 255, 255, 0.3);
+  padding: 24px 20px 8px;
+  max-width: 1280px;
+  margin: 0 auto;
+  text-align: left;
+}
+
+/* ── highlighted card (new scenarios) ── */
+.card-highlight {
+  border-color: rgba(1, 197, 245, 0.2);
+  background: rgba(1, 126, 254, 0.06);
+}
+
+.card-status.partial {
+  background: rgba(255, 159, 10, 0.15);
+  color: rgba(255, 159, 10, 0.9);
+}
+
+/* ── benchmark card ── */
+.card-bench {
+  border-color: rgba(255, 214, 10, 0.2);
+  background: rgba(255, 214, 10, 0.04);
+  grid-column: 1 / -1;
+}
+
+.bench-bars {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-top: 4px;
+}
+
+.bench-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.bench-label {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  color: rgba(255, 255, 255, 0.5);
+  width: 90px;
+  flex-shrink: 0;
+}
+
+.bench-track {
+  flex: 1;
+  height: 10px;
+  background: rgba(255, 255, 255, 0.06);
+  border-radius: 6px;
+  overflow: hidden;
+}
+
+.bench-bar {
+  height: 100%;
+  width: 0;
+  border-radius: 6px;
+  transition: width 0.6s ease;
+}
+
+.bench-bar--main {
+  background: rgba(255, 69, 58, 0.7);
+}
+
+.bench-bar--worker {
+  background: rgba(50, 215, 75, 0.7);
+}
+
+.bench-time {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 12px;
+  color: rgba(255, 255, 255, 0.7);
+  width: 70px;
+  text-align: right;
+  flex-shrink: 0;
+}
+
+.bench-speedup {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 18px;
+  font-weight: 500;
+  color: rgba(50, 215, 75, 0.9);
+  text-align: center;
+  min-height: 24px;
+  margin-top: 4px;
+}

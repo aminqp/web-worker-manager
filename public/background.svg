@@ -1,60 +1,130 @@
 <svg width="1920" height="494" viewBox="0 0 1920 494" fill="none" xmlns="http://www.w3.org/2000/svg">
-    <g filter="url(#filter0_b_201_11645)">
-        <path d="M-555.158 -935.552L206.014 299.32C272.103 406.538 412.596 439.88 519.815 373.791L1754.69 -387.38C1861.9 -453.469 1895.25 -593.963 1829.16 -701.181L1067.99 -1936.05C1001.9 -2043.27 861.404 -2076.61 754.186 -2010.52L-480.686 -1249.35C-587.905 -1183.26 -621.247 -1042.77 -555.158 -935.552Z" fill="url(#paint0_linear_201_11645)"/>
-    </g>
-    <g filter="url(#filter1_b_201_11645)">
-        <path d="M-365.85 -978.718L155.699 157.844C200.984 256.531 317.698 299.822 416.385 254.536L1552.95 -267.013C1651.63 -312.299 1694.93 -429.012 1649.64 -527.699L1128.09 -1664.26C1082.81 -1762.95 966.092 -1806.24 867.404 -1760.95L-269.158 -1239.4C-367.845 -1194.12 -411.136 -1077.41 -365.85 -978.718Z" fill="url(#paint1_linear_201_11645)"/>
-    </g>
-    <g filter="url(#filter2_b_201_11645)">
-        <path d="M-199.592 -995.206L127.265 32.0959C155.644 121.29 250.956 170.59 340.15 142.211L1367.45 -184.646C1456.65 -213.025 1505.95 -308.337 1477.57 -397.531L1150.71 -1424.83C1122.33 -1514.03 1027.02 -1563.33 937.825 -1534.95L-89.4769 -1208.09C-178.671 -1179.71 -227.971 -1084.4 -199.592 -995.206Z" fill="url(#paint2_linear_201_11645)"/>
-    </g>
-    <g filter="url(#filter3_b_201_11645)">
-        <path d="M-55.5683 -991.823L116.176 -78.4863C131.088 0.816985 207.465 53.0162 286.768 38.104L1200.1 -133.64C1279.41 -148.552 1331.61 -224.929 1316.7 -304.232L1144.95 -1217.57C1130.04 -1296.87 1053.66 -1349.07 974.359 -1334.16L61.022 -1162.42C-18.2812 -1147.5 -70.4805 -1071.13 -55.5683 -991.823Z" fill="url(#paint3_linear_201_11645)"/>
-    </g>
-    <defs>
-        <filter id="filter0_b_201_11645" x="-594.982" y="-2050.35" width="2463.96" height="2463.96" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB">
-            <feFlood flood-opacity="0" result="BackgroundImageFix"/>
-            <feGaussianBlur in="BackgroundImageFix" stdDeviation="2.93731"/>
-            <feComposite in2="SourceAlpha" operator="in" result="effect1_backgroundBlur_201_11645"/>
-            <feBlend mode="normal" in="SourceGraphic" in2="effect1_backgroundBlur_201_11645" result="shape"/>
-        </filter>
-        <filter id="filter1_b_201_11645" x="-389.688" y="-1784.79" width="2063.16" height="2063.16" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB">
-            <feFlood flood-opacity="0" result="BackgroundImageFix"/>
-            <feGaussianBlur in="BackgroundImageFix" stdDeviation="2.93731"/>
-            <feComposite in2="SourceAlpha" operator="in" result="effect1_backgroundBlur_201_11645"/>
-            <feBlend mode="normal" in="SourceGraphic" in2="effect1_backgroundBlur_201_11645" result="shape"/>
-        </filter>
-        <filter id="filter2_b_201_11645" x="-213.49" y="-1548.85" width="1704.95" height="1704.95" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB">
-            <feFlood flood-opacity="0" result="BackgroundImageFix"/>
-            <feGaussianBlur in="BackgroundImageFix" stdDeviation="2.93731"/>
-            <feComposite in2="SourceAlpha" operator="in" result="effect1_backgroundBlur_201_11645"/>
-            <feBlend mode="normal" in="SourceGraphic" in2="effect1_backgroundBlur_201_11645" result="shape"/>
-        </filter>
-        <filter id="filter3_b_201_11645" x="-63.986" y="-1342.58" width="1389.1" height="1389.1" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB">
-            <feFlood flood-opacity="0" result="BackgroundImageFix"/>
-            <feGaussianBlur in="BackgroundImageFix" stdDeviation="2.93731"/>
-            <feComposite in2="SourceAlpha" operator="in" result="effect1_backgroundBlur_201_11645"/>
-            <feBlend mode="normal" in="SourceGraphic" in2="effect1_backgroundBlur_201_11645" result="shape"/>
-        </filter>
-        <linearGradient id="paint0_linear_201_11645" x1="850.924" y1="-972.878" x2="1824.39" y2="-447.912" gradientUnits="userSpaceOnUse">
-            <stop stop-color="#19191C" stop-opacity="0"/>
-            <stop offset="0.33" stop-color="#129CFF" stop-opacity="0.15"/>
-            <stop offset="0.9" stop-color="#00D1FF" stop-opacity="0.55"/>
-        </linearGradient>
-        <linearGradient id="paint1_linear_201_11645" x1="841.17" y1="-862.941" x2="1618.95" y2="-311.486" gradientUnits="userSpaceOnUse">
-            <stop stop-color="#19191C" stop-opacity="0"/>
-            <stop offset="0.33" stop-color="#129CFF" stop-opacity="0.15"/>
-            <stop offset="0.9" stop-color="#00D1FF" stop-opacity="0.55"/>
-        </linearGradient>
-        <linearGradient id="paint2_linear_201_11645" x1="821.024" y1="-769.324" x2="1428.59" y2="-215.763" gradientUnits="userSpaceOnUse">
-            <stop stop-color="#19191C" stop-opacity="0"/>
-            <stop offset="0.33" stop-color="#129CFF" stop-opacity="0.15"/>
-            <stop offset="0.9" stop-color="#00D1FF" stop-opacity="0.55"/>
-        </linearGradient>
-        <linearGradient id="paint3_linear_201_11645" x1="793.987" y1="-691.327" x2="1255.7" y2="-153.842" gradientUnits="userSpaceOnUse">
-            <stop stop-color="#19191C" stop-opacity="0"/>
-            <stop offset="0.33" stop-color="#129CFF" stop-opacity="0.15"/>
-            <stop offset="0.9" stop-color="#00D1FF" stop-opacity="0.55"/>
-        </linearGradient>
-    </defs>
+  <defs>
+    <!-- Ambient glow gradients -->
+    <radialGradient id="glow0" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#4F8EF7" stop-opacity="0.18"/>
+      <stop offset="100%" stop-color="#4F8EF7" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="glow1" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#7C5CFC" stop-opacity="0.15"/>
+      <stop offset="100%" stop-color="#7C5CFC" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="glow2" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#5BC8AF" stop-opacity="0.13"/>
+      <stop offset="100%" stop-color="#5BC8AF" stop-opacity="0"/>
+    </radialGradient>
+    <!-- Node glow -->
+    <radialGradient id="nodeGlow" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#4F8EF7" stop-opacity="0.7"/>
+      <stop offset="100%" stop-color="#4F8EF7" stop-opacity="0"/>
+    </radialGradient>
+    <filter id="blur-soft">
+      <feGaussianBlur stdDeviation="2.5"/>
+    </filter>
+  </defs>
+
+  <!-- Background -->
+  <rect width="1920" height="494" fill="#0a0a0f"/>
+
+  <!-- Ambient blobs -->
+  <ellipse cx="320" cy="180" rx="420" ry="280" fill="url(#glow1)" filter="url(#blur-soft)"/>
+  <ellipse cx="960" cy="80" rx="560" ry="220" fill="url(#glow0)" filter="url(#blur-soft)"/>
+  <ellipse cx="1600" cy="300" rx="380" ry="260" fill="url(#glow2)" filter="url(#blur-soft)"/>
+  <ellipse cx="1200" cy="420" rx="300" ry="160" fill="url(#glow1)" filter="url(#blur-soft)"/>
+
+  <!-- Connection lines (worker threads) -->
+  <!-- Cluster 1 (left) -->
+  <line x1="120" y1="380" x2="280" y2="220" stroke="#4F8EF7" stroke-width="0.8" opacity="0.25"/>
+  <line x1="120" y1="380" x2="60" y2="180" stroke="#7C5CFC" stroke-width="0.8" opacity="0.2"/>
+  <line x1="280" y1="220" x2="60" y2="180" stroke="#4F8EF7" stroke-width="0.6" opacity="0.15"/>
+  <line x1="280" y1="220" x2="440" y2="310" stroke="#5BC8AF" stroke-width="0.8" opacity="0.2"/>
+  <line x1="60" y1="180" x2="200" y2="80" stroke="#4F8EF7" stroke-width="0.6" opacity="0.18"/>
+  <line x1="200" y1="80" x2="380" y2="130" stroke="#7C5CFC" stroke-width="0.7" opacity="0.2"/>
+  <line x1="380" y1="130" x2="440" y2="310" stroke="#4F8EF7" stroke-width="0.6" opacity="0.15"/>
+
+  <!-- Cluster 2 (center-left) -->
+  <line x1="560" y1="60" x2="700" y2="200" stroke="#4F8EF7" stroke-width="0.8" opacity="0.22"/>
+  <line x1="700" y1="200" x2="620" y2="360" stroke="#7C5CFC" stroke-width="0.8" opacity="0.2"/>
+  <line x1="560" y1="60" x2="760" y2="90" stroke="#5BC8AF" stroke-width="0.7" opacity="0.18"/>
+  <line x1="760" y1="90" x2="700" y2="200" stroke="#4F8EF7" stroke-width="0.6" opacity="0.15"/>
+  <line x1="620" y1="360" x2="800" y2="420" stroke="#4F8EF7" stroke-width="0.7" opacity="0.18"/>
+  <line x1="800" y1="420" x2="880" y2="280" stroke="#7C5CFC" stroke-width="0.6" opacity="0.15"/>
+  <line x1="760" y1="90" x2="880" y2="280" stroke="#5BC8AF" stroke-width="0.7" opacity="0.2"/>
+
+  <!-- Cluster 3 (center — main hub) -->
+  <line x1="960" y1="160" x2="1060" y2="320" stroke="#4F8EF7" stroke-width="1" opacity="0.28"/>
+  <line x1="960" y1="160" x2="860" y2="320" stroke="#4F8EF7" stroke-width="1" opacity="0.28"/>
+  <line x1="960" y1="160" x2="1120" y2="100" stroke="#7C5CFC" stroke-width="0.8" opacity="0.22"/>
+  <line x1="960" y1="160" x2="820" y2="80" stroke="#7C5CFC" stroke-width="0.8" opacity="0.22"/>
+  <line x1="960" y1="160" x2="1000" y2="420" stroke="#5BC8AF" stroke-width="0.7" opacity="0.18"/>
+  <line x1="1060" y1="320" x2="1200" y2="380" stroke="#4F8EF7" stroke-width="0.7" opacity="0.18"/>
+  <line x1="860" y1="320" x2="740" y2="400" stroke="#4F8EF7" stroke-width="0.7" opacity="0.18"/>
+  <line x1="1120" y1="100" x2="1200" y2="380" stroke="#5BC8AF" stroke-width="0.6" opacity="0.14"/>
+  <line x1="820" y1="80" x2="740" y2="400" stroke="#5BC8AF" stroke-width="0.6" opacity="0.14"/>
+
+  <!-- Cluster 4 (center-right) -->
+  <line x1="1300" y1="60" x2="1420" y2="200" stroke="#4F8EF7" stroke-width="0.8" opacity="0.22"/>
+  <line x1="1420" y1="200" x2="1340" y2="370" stroke="#7C5CFC" stroke-width="0.8" opacity="0.2"/>
+  <line x1="1300" y1="60" x2="1500" y2="110" stroke="#5BC8AF" stroke-width="0.7" opacity="0.18"/>
+  <line x1="1500" y1="110" x2="1420" y2="200" stroke="#4F8EF7" stroke-width="0.6" opacity="0.15"/>
+  <line x1="1340" y1="370" x2="1520" y2="430" stroke="#4F8EF7" stroke-width="0.7" opacity="0.18"/>
+  <line x1="1520" y1="430" x2="1580" y2="260" stroke="#7C5CFC" stroke-width="0.6" opacity="0.15"/>
+  <line x1="1500" y1="110" x2="1580" y2="260" stroke="#5BC8AF" stroke-width="0.7" opacity="0.2"/>
+
+  <!-- Cluster 5 (right) -->
+  <line x1="1700" y1="380" x2="1840" y2="220" stroke="#4F8EF7" stroke-width="0.8" opacity="0.25"/>
+  <line x1="1700" y1="380" x2="1760" y2="160" stroke="#7C5CFC" stroke-width="0.8" opacity="0.2"/>
+  <line x1="1840" y1="220" x2="1760" y2="160" stroke="#4F8EF7" stroke-width="0.6" opacity="0.15"/>
+  <line x1="1840" y1="220" x2="1660" y2="100" stroke="#5BC8AF" stroke-width="0.7" opacity="0.18"/>
+  <line x1="1660" y1="100" x2="1760" y2="160" stroke="#4F8EF7" stroke-width="0.6" opacity="0.15"/>
+
+  <!-- Cross-cluster long connections -->
+  <line x1="440" y1="310" x2="620" y2="360" stroke="#4F8EF7" stroke-width="0.5" opacity="0.1"/>
+  <line x1="880" y1="280" x2="860" y2="320" stroke="#5BC8AF" stroke-width="0.5" opacity="0.1"/>
+  <line x1="1200" y1="380" x2="1340" y2="370" stroke="#4F8EF7" stroke-width="0.5" opacity="0.1"/>
+  <line x1="1580" y1="260" x2="1700" y2="380" stroke="#7C5CFC" stroke-width="0.5" opacity="0.1"/>
+
+  <!-- Worker nodes — outer clusters (teal/purple) -->
+  <circle cx="120" cy="380" r="4" fill="#5BC8AF" opacity="0.7"/>
+  <circle cx="60" cy="180" r="3.5" fill="#7C5CFC" opacity="0.65"/>
+  <circle cx="200" cy="80" r="3" fill="#4F8EF7" opacity="0.6"/>
+  <circle cx="380" cy="130" r="3.5" fill="#7C5CFC" opacity="0.6"/>
+  <circle cx="440" cy="310" r="3" fill="#5BC8AF" opacity="0.55"/>
+
+  <circle cx="560" cy="60" r="3.5" fill="#4F8EF7" opacity="0.6"/>
+  <circle cx="760" cy="90" r="3" fill="#5BC8AF" opacity="0.55"/>
+  <circle cx="700" cy="200" r="4" fill="#7C5CFC" opacity="0.65"/>
+  <circle cx="620" cy="360" r="3" fill="#4F8EF7" opacity="0.55"/>
+  <circle cx="800" cy="420" r="3.5" fill="#5BC8AF" opacity="0.6"/>
+  <circle cx="880" cy="280" r="3" fill="#7C5CFC" opacity="0.55"/>
+
+  <!-- Main hub (center) -->
+  <circle cx="960" cy="160" r="10" fill="#4F8EF7" opacity="0.9"/>
+  <circle cx="960" cy="160" r="6" fill="none" stroke="#fff" stroke-width="1.5" opacity="0.5"/>
+  <circle cx="960" cy="160" r="2.5" fill="#fff" opacity="0.9"/>
+  <!-- Hub glow -->
+  <circle cx="960" cy="160" r="28" fill="url(#nodeGlow)" opacity="0.5"/>
+
+  <circle cx="1060" cy="320" r="4" fill="#7C5CFC" opacity="0.65"/>
+  <circle cx="860" cy="320" r="4" fill="#7C5CFC" opacity="0.65"/>
+  <circle cx="1120" cy="100" r="3.5" fill="#5BC8AF" opacity="0.6"/>
+  <circle cx="820" cy="80" r="3.5" fill="#5BC8AF" opacity="0.6"/>
+  <circle cx="1000" cy="420" r="3" fill="#4F8EF7" opacity="0.55"/>
+  <circle cx="1200" cy="380" r="3.5" fill="#7C5CFC" opacity="0.6"/>
+  <circle cx="740" cy="400" r="3.5" fill="#7C5CFC" opacity="0.6"/>
+
+  <circle cx="1300" cy="60" r="3.5" fill="#4F8EF7" opacity="0.6"/>
+  <circle cx="1500" cy="110" r="3" fill="#5BC8AF" opacity="0.55"/>
+  <circle cx="1420" cy="200" r="4" fill="#7C5CFC" opacity="0.65"/>
+  <circle cx="1340" cy="370" r="3" fill="#4F8EF7" opacity="0.55"/>
+  <circle cx="1520" cy="430" r="3.5" fill="#5BC8AF" opacity="0.6"/>
+  <circle cx="1580" cy="260" r="3" fill="#7C5CFC" opacity="0.55"/>
+
+  <circle cx="1700" cy="380" r="4" fill="#5BC8AF" opacity="0.7"/>
+  <circle cx="1760" cy="160" r="3.5" fill="#7C5CFC" opacity="0.65"/>
+  <circle cx="1660" cy="100" r="3" fill="#4F8EF7" opacity="0.6"/>
+  <circle cx="1840" cy="220" r="3.5" fill="#5BC8AF" opacity="0.6"/>
+
+  <!-- Subtle horizontal scan line -->
+  <line x1="0" y1="247" x2="1920" y2="247" stroke="#4F8EF7" stroke-width="0.4" opacity="0.06"/>
 </svg>

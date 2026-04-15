@@ -1,0 +1,36 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 63" fill="none">
+  <!-- Central hub -->
+  <circle cx="120" cy="31.5" r="10" fill="#4F8EF7" opacity="0.95"/>
+  <!-- Hub inner ring -->
+  <circle cx="120" cy="31.5" r="6" fill="none" stroke="#fff" stroke-width="1.5" opacity="0.7"/>
+  <!-- Hub dot -->
+  <circle cx="120" cy="31.5" r="2.5" fill="#fff"/>
+
+  <!-- Worker nodes -->
+  <circle cx="72" cy="12" r="6.5" fill="#7C5CFC" opacity="0.9"/>
+  <circle cx="72" cy="12" r="3" fill="#fff" opacity="0.85"/>
+
+  <circle cx="168" cy="12" r="6.5" fill="#7C5CFC" opacity="0.9"/>
+  <circle cx="168" cy="12" r="3" fill="#fff" opacity="0.85"/>
+
+  <circle cx="72" cy="51" r="6.5" fill="#7C5CFC" opacity="0.9"/>
+  <circle cx="72" cy="51" r="3" fill="#fff" opacity="0.85"/>
+
+  <circle cx="168" cy="51" r="6.5" fill="#7C5CFC" opacity="0.9"/>
+  <circle cx="168" cy="51" r="3" fill="#fff" opacity="0.85"/>
+
+  <circle cx="50" cy="31.5" r="6.5" fill="#5BC8AF" opacity="0.9"/>
+  <circle cx="50" cy="31.5" r="3" fill="#fff" opacity="0.85"/>
+
+  <circle cx="190" cy="31.5" r="6.5" fill="#5BC8AF" opacity="0.9"/>
+  <circle cx="190" cy="31.5" r="3" fill="#fff" opacity="0.85"/>
+
+  <!-- Connector lines -->
+  <line x1="78" y1="15.5" x2="112" y2="27" stroke="#4F8EF7" stroke-width="1.2" opacity="0.45"/>
+  <line x1="162" y1="15.5" x2="128" y2="27" stroke="#4F8EF7" stroke-width="1.2" opacity="0.45"/>
+  <line x1="78" y1="47.5" x2="112" y2="36" stroke="#4F8EF7" stroke-width="1.2" opacity="0.45"/>
+  <line x1="162" y1="47.5" x2="128" y2="36" stroke="#4F8EF7" stroke-width="1.2" opacity="0.45"/>
+  <line x1="56.5" y1="31.5" x2="110" y2="31.5" stroke="#5BC8AF" stroke-width="1.2" opacity="0.45"/>
+  <line x1="130" y1="31.5" x2="183.5" y2="31.5" stroke="#5BC8AF" stroke-width="1.2" opacity="0.45"/>
+
+</svg>

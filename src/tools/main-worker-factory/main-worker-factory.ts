@@ -1,6 +1,7 @@
 import {
+  CollectOptions,
+  CollectedResult,
   MainWorkerFactoryOptions,
-  MainWorkerFactoryWorker,
   WorkerConfig,
   WorkerFunction,
   WorkerInstanceConfig,
@@ -8,283 +9,224 @@ import {
 } from './types.ts';
 import { WorkerFactory } from '../worker-factory';
 
-enum RESULT_STATUS {
-  FULFILLED = 'fulfilled',
-  REJECTED = 'rejected',
+/**
+ * Recursively collects all Transferable objects from a value.
+ * Transferables (ArrayBuffer, MessagePort, ImageBitmap, OffscreenCanvas)
+ * are zero-copy — they are moved to the worker instead of cloned.
+ */
+export function extractTransferables(value: unknown, seen = new Set<object>()): Transferable[] {
+  if (value === null || typeof value !== 'object') return [];
+  if (seen.has(value as object)) return [];
+  seen.add(value as object);
+
+  if (
+    value instanceof ArrayBuffer ||
+    value instanceof MessagePort ||
+    (typeof ImageBitmap !== 'undefined' && value instanceof ImageBitmap) ||
+    (typeof OffscreenCanvas !== 'undefined' && value instanceof OffscreenCanvas)
+  ) {
+    return [value as Transferable];
+  }
+
+  if (ArrayBuffer.isView(value)) {
+    return [value.buffer];
+  }
+
+  if (Array.isArray(value)) {
+    return value.flatMap(item => extractTransferables(item, seen));
+  }
+
+  return Object.values(value as object).flatMap(v => extractTransferables(v, seen));
 }
 
-const threadHasError = function () {
-  let seconds = 5;
-  seconds *= Math.random() + 0.5;
-  let start = new Date();
-  while ((new Date().valueOf() - start.valueOf()) / 1000 < seconds);
-
-  throw new Error('someErrorThread');
-};
-
 class MainWorkerFactory {
-  private readonly _worker: Worker;
-  private readonly _workers: MainWorkerFactoryOptions['workers'];
-  private _activeWorkers: MainWorkerFactoryWorker[] = [];
-  private _workersResult: unknown[] = [];
+  private readonly _workers: WorkerConfig[];
   private readonly _threads: number;
 
-  constructor(workerFunction: any, options: MainWorkerFactoryOptions) {
-    const workerCode: string = workerFunction.toString();
-    const workerBlob = new Blob([`(${workerCode})()`], {
-      type: 'application/javascript',
-    });
-
+  constructor(_initiator: WorkerFunction, options: MainWorkerFactoryOptions) {
     this._workers = options.workers;
-    this._worker = new Worker(URL.createObjectURL(workerBlob));
-
     this._threads = navigator.hardwareConcurrency;
   }
 
-  initWorkers() {
-    this._activeWorkers = this._workers.map((worker) => ({
-      ...worker,
-      worker: new WorkerFactory(worker.func),
-    }));
-  }
-
-  initWorker(workerFunction: WorkerFunction) {
+  private initWorker(workerFunction: WorkerFunction): WorkerFactory {
     return new WorkerFactory(workerFunction);
   }
 
   /**
-   * Partitions an array into a specified number of chunks
-   * @param array The array to partition
-   * @param numChunks The number of chunks to create
-   * @returns An array of chunks
+   * Partitions an array into up to numChunks evenly-sized chunks.
    */
   partitionArray<T>(array: T[], numChunks: number): T[][] {
     if (!array.length) return [];
-    if (numChunks <= 0) throw new Error('Number of chunks must be positive');
-    if (numChunks === 1) return [array.slice()];
+    if (numChunks <= 0) throw new Error('numChunks must be positive');
 
-    // Ensure we don't create more chunks than there are elements
-    const validChunks = Math.min(numChunks, array.length);
+    const chunks = Math.min(numChunks, array.length);
+    const chunkSize = Math.floor(array.length / chunks);
+    const remainder = array.length % chunks;
     const result: T[][] = [];
+    let start = 0;
 
-    // Calculate minimum size per chunk
-    const chunkSize = Math.floor(array.length / validChunks);
-    // Calculate how many chunks get an extra element
-    const remainder = array.length % validChunks;
-
-    let startIndex = 0;
-
-    for (let i = 0; i < validChunks; i++) {
-      // Add one extra item to the first 'remainder' chunks
-      const currentChunkSize = chunkSize + (i < remainder ? 1 : 0);
-      const endIndex = startIndex + currentChunkSize;
-
-      result.push(array.slice(startIndex, endIndex));
-      startIndex = endIndex;
+    for (let i = 0; i < chunks; i++) {
+      const size = chunkSize + (i < remainder ? 1 : 0);
+      result.push(array.slice(start, start + size));
+      start += size;
     }
 
     return result;
   }
 
-  /**
-   * Runs a worker with the specified name and input data
-   * @param workerName The name of the worker to run
-   * @param data The data to process
-   * @returns A promise that resolves with the worker results
-   */
+  private findWorkerByName(name: string): WorkerConfig | undefined {
+    return this._workers.find((w) => w.name === name);
+  }
+
   async runWorker(
     workerName: string,
-    {
-      srcData,
-      ...otherParams
-    }: { srcData: unknown | unknown[] } & Record<string, unknown>,
+    { srcData, ...otherParams }: { srcData: unknown } & Record<string, unknown>,
   ): Promise<PromiseSettledResult<WorkerResult>[]> {
-    console.log('\n\n <<<<  runWorker >>>> => srcData -> ', srcData);
-    const foundWorker = this.findWorkerByName(workerName);
+    const config = this.findWorkerByName(workerName);
+    if (!config) return Promise.reject(new Error(`Worker "${workerName}" not found`));
 
-    if (!foundWorker) {
-      const error = new Error(`Worker ${workerName} not found`);
-      return Promise.reject(error);
-    }
-
-    const threadCount = foundWorker.maxConcurrency || this._threads;
+    const threadCount = config.maxConcurrency ?? this._threads;
     const shouldPartition = Boolean(
-      Array.isArray(srcData) && srcData.length > 1 && foundWorker.partition,
+      Array.isArray(srcData) && srcData.length > 1 && config.partition,
     );
 
-    // Prepare data for worker(s)
     const processedData = shouldPartition
       ? this.partitionArray(srcData as unknown[], threadCount)
       : srcData;
 
-    // Initialize and execute workers
-    const workerPromises = this.createWorkerPromises(
-      foundWorker,
+    const promises = this.createWorkerPromises(
+      config,
       workerName,
       { data: processedData, ...otherParams },
       threadCount,
       shouldPartition,
     );
 
-    return Promise.allSettled(workerPromises);
+    return Promise.allSettled(promises);
   }
 
-  /**
-   * Finds a worker by name
-   * @param workerName The name of the worker to find
-   * @returns The worker configuration if found, otherwise undefined
-   */
-  private findWorkerByName(workerName: string) {
-    return this._workers.find((worker) => worker.name === workerName);
-  }
-
-  /**
-   * Creates promises for each worker instance
-   * @param workerConfig The worker configuration
-   * @param workerName The name of the worker
-   * @param srcWorkerData
-   * @param threadCount The number of threads to use
-   * @param isPartitioned Whether the data is partitioned
-   * @returns An array of promises for the worker executions
-   */
   private createWorkerPromises(
-    workerConfig: WorkerConfig,
+    config: WorkerConfig,
     workerName: string,
-    srcWorkerData: { data: unknown | unknown[][] } & Partial<
-      Record<string, unknown>
-    >,
+    srcWorkerData: { data: unknown } & Record<string, unknown>,
     threadCount: number,
     isPartitioned: boolean,
   ): Promise<WorkerResult>[] {
     const { data: srcData, ...otherParams } = srcWorkerData;
-    return Array(threadCount)
-      .fill(0)
-      .map((_, index) => {
-        const workerData =
-          isPartitioned && Array.isArray(srcData) ? srcData[index] : srcData;
 
-        return this.runWorkerWithRetry(
-          {
-            workerFunc: workerConfig.func,
-            workerName,
-            index,
-            data: { data: workerData, ...otherParams },
-          },
-          workerConfig.retries,
-        );
-      });
+    return Array.from({ length: threadCount }, (_, index) => {
+      const data = isPartitioned && Array.isArray(srcData) ? srcData[index] : srcData;
+      return this.runWorkerWithRetry(
+        { workerFunc: config.func, workerName, index, data: { data, ...otherParams } },
+        config.retries,
+      );
+    });
   }
 
-  runWorkerWithRetry(
-    workerConfigs: WorkerInstanceConfig,
+  private async runWorkerWithRetry(
+    instanceConfig: WorkerInstanceConfig,
     retryCount = 2,
   ): Promise<WorkerResult> {
-    console.log(
-      '\n\n <<<<  runWorkerWithRetry >>>> => workerConfigs -> ',
-      workerConfigs,
-    );
-    return this.initiateWorker(workerConfigs)
-      .then((result: WorkerResult) => {
-        return Promise.resolve(result);
-      })
-      .catch((error) => {
-        if (retryCount > 0) {
-          console.error(
-            `Worker ${workerConfigs.index} failed, retrying (${retryCount} attempts remaining):`,
-            error,
-          );
-          return this.runWorkerWithRetry(
-            {
-              ...workerConfigs,
-              index: workerConfigs.index,
-              // workerConfigs.index === 3
-              //   ? workerConfigs.index - 1
-              //   : workerConfigs.index,
-            },
-            retryCount - 1,
-          );
-        } else {
-          console.error(`Worker failed after multiple retries:`, error);
-          return Promise.reject(error); // Re-throw the error after exhausting retries
-        }
-      });
+    try {
+      return await this.initiateWorker(instanceConfig);
+    } catch (error) {
+      if (retryCount > 0) {
+        console.error(
+          `Worker ${instanceConfig.index} failed, retrying (${retryCount} left):`,
+          error,
+        );
+        return this.runWorkerWithRetry(instanceConfig, retryCount - 1);
+      }
+      console.error(`Worker failed after all retries:`, error);
+      throw error;
+    }
   }
 
-  initiateWorker({
+  private initiateWorker({
     workerFunc,
     workerName,
     index,
     data,
   }: WorkerInstanceConfig): Promise<WorkerResult> {
     return new Promise((resolve, reject) => {
-      // let worker = this.initWorker(workerFunc);
+      const worker = this.initWorker(workerFunc);
+      const raw = worker.getWorker;
 
-      let worker = this.initWorker(workerFunc);
-      // index % 2 === 0
-      //   ? this.initWorker(workerFunc)
-      //   : this.initWorker(threadHasError);
-
-      // TODO-qp:: handle failed threads
-      worker.getWorker.onerror = (event) => {
-        worker.getWorker.terminate();
-        reject({
-          index,
-          workerConfigs: {
-            workerFunc,
-            workerName,
-            index,
-            data,
-          },
-          failedResult: event,
-        });
+      raw.onerror = (event) => {
+        raw.terminate();
+        reject({ index, workerConfigs: { workerFunc, workerName, index, data }, failedResult: event });
       };
 
-      worker.getWorker.onmessage = (event) => {
-        // this.catchResult({
-        //   workerResult: event.data,
-        //   index,
-        //   resolve,
-        // });
-
-        resolve({
-          index,
-          workerConfigs: {
-            workerFunc,
-            workerName,
-            index,
-            data,
-          },
-          successResult: event,
-        });
-        worker.getWorker.terminate();
+      raw.onmessage = (event) => {
+        resolve({ index, workerConfigs: { workerFunc, workerName, index, data }, successResult: event });
+        raw.terminate();
       };
 
-      worker.getWorker.postMessage({
-        index,
-        ...(Array.isArray(data) ? { data } : data),
-      });
+      const payload = { index, ...(Array.isArray(data) ? { data } : data) };
+      raw.postMessage(payload, extractTransferables(payload));
     });
   }
 
-  catchResult({
-    workerResult,
-    index,
-    resolve,
-  }: {
-    workerResult: unknown;
-    index: number;
-    resolve: (value: unknown) => void;
-  }) {
-    this._workersResult[index] = workerResult;
+  /**
+   * Collects and merges the settled results from `runWorker` — off the main thread.
+   *
+   * @param settled  The `PromiseSettledResult[]` returned by `runWorker`
+   * @param options  Optional `reducer` function (must be self-contained)
+   *
+   * @example
+   * // default: flat array of all shard data
+   * const { data, succeeded, failed } = await foreman.collectResults(res);
+   *
+   * @example
+   * // custom reducer: sum numbers across shards
+   * const { data } = await foreman.collectResults<number[], number>(res, {
+   *   reducer: (shards) => shards.flat().reduce((a, b) => a + b, 0),
+   * });
+   */
+  async collectResults<T = unknown, R = T[]>(
+    settled: PromiseSettledResult<WorkerResult>[],
+    options: CollectOptions<T, R> = {},
+  ): Promise<CollectedResult<R>> {
+    const fulfilled = settled.filter(r => r.status === 'fulfilled') as PromiseFulfilledResult<WorkerResult>[];
+    const errors    = settled.filter(r => r.status === 'rejected')  as PromiseRejectedResult[];
 
-    if (this._workersResult.length === this._threads) {
-      console.log(`\n\n<<<<< IS FINISHED  >>>>> =>  -> `);
-      resolve(this._workersResult);
-    }
-  }
+    const shards = fulfilled.map(r => r.value.successResult!.data as T);
 
-  get getWorker() {
-    return this._worker;
+    // Build a self-contained merge function for the worker
+    const reducerSrc = options.reducer
+      ? options.reducer.toString()
+      : '(shards) => shards.flat()';
+
+    const mergeResult = await new Promise<R>((resolve, reject) => {
+      const workerSrc = `
+        const reducer = ${reducerSrc};
+        self.addEventListener('message', (event) => {
+          try {
+            const result = reducer(event.data);
+            self.postMessage({ ok: true, data: result });
+          } catch (err) {
+            self.postMessage({ ok: false, error: String(err) });
+          }
+        });
+      `;
+      const blob   = new Blob([workerSrc], { type: 'application/javascript' });
+      const worker = new Worker(URL.createObjectURL(blob));
+
+      worker.onmessage = (e) => {
+        worker.terminate();
+        if (e.data.ok) resolve(e.data.data);
+        else reject(new Error(e.data.error));
+      };
+      worker.onerror = (e) => { worker.terminate(); reject(e); };
+      worker.postMessage(shards);
+    });
+
+    return {
+      data: mergeResult,
+      succeeded: fulfilled.length,
+      failed: errors.length,
+      errors,
+    };
   }
 }
 

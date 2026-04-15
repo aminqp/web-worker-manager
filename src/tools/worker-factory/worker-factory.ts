@@ -1,20 +1,36 @@
+import { WorkerFunction } from '../main-worker-factory/types';
+
 const workerTemplate = (func: string) => `
-self.addEventListener('message', (event) => {
+const extractTransferables = (value, seen = new Set()) => {
+  if (value === null || typeof value !== 'object') return [];
+  if (seen.has(value)) return [];
+  seen.add(value);
+  if (value instanceof ArrayBuffer || value instanceof MessagePort ||
+      (typeof ImageBitmap !== 'undefined' && value instanceof ImageBitmap) ||
+      (typeof OffscreenCanvas !== 'undefined' && value instanceof OffscreenCanvas)) {
+    return [value];
+  }
+  if (ArrayBuffer.isView(value)) return [value.buffer];
+  if (Array.isArray(value)) return value.flatMap(i => extractTransferables(i, seen));
+  return Object.values(value).flatMap(v => extractTransferables(v, seen));
+};
+
+self.addEventListener('message', async (event) => {
     const begin = performance.now();
     console.log('start');
 
-    const output = ${func}(event.data);
+    const output = await ${func}(event.data);
 
     console.log('finish in', performance.now() - begin, 'ms');
 
-    self.postMessage(output);
+    self.postMessage(output, extractTransferables(output));
   })
-`
+`;
 
 class WorkerFactory {
   readonly _worker: Worker;
 
-  constructor(workerFunction: any) {
+  constructor(workerFunction: WorkerFunction) {
     const workerCode: string = workerTemplate(workerFunction.toString());
     const workerBlob = new Blob([workerCode], {
       type: 'application/javascript',
