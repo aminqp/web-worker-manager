@@ -28,11 +28,12 @@
     "lint": "eslint --fix .",
     "test": "vitest run",
     "test:watch": "vitest",
-    "release:patch": "pnpm version patch && pnpm run release:publish",
-    "release:minor": "pnpm version minor && pnpm run release:publish",
-    "release:major": "pnpm version major && pnpm run release:publish",
-    "release:publish": "pnpm run build:lib && pnpm publish",
-    "prepublishOnly": "pnpm run build:lib",
+    "release:patch": "npm version patch && npm run release:publish",
+    "release:minor": "npm version minor && npm run release:publish",
+    "release:major": "npm version major && npm run release:publish",
+    "release:publish": "npm run build:lib && npm publish",
+    "prepublishOnly": "npm run build:lib",
+    "lint-staged": "lint-staged",
     "prepare": "husky"
   },
   "keywords": [
