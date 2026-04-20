@@ -25,16 +25,15 @@ jobs:
         with:
           node-version: 20
           cache: pnpm
-          registry-url: 'https://registry.npmjs.org'
+
+      - name: Use CI npmrc
+        run: cp .npmrc.ci .npmrc
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
       - name: Build library
         run: pnpm build:lib
-
-      - name: Use CI npmrc
-        run: cp .npmrc.ci .npmrc
 
       - name: Publish to NPM
         run: pnpm publish --no-git-checks --access public
